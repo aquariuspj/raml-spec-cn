@@ -306,30 +306,27 @@ types:
 
 === 概览
 
-This section is informative.
+这一节是一个概览。
 
-The RAML type system borrows from object oriented programming languages such as Java, as well as from XSD and JSON Schemas.
+RAML类型系统的灵感来源于Java，同时又和XSD和Json Schemas类似。
 
-RAML Types in a nutshell:
+RAML类型概览：
 
-*   Types are similar to Java classes.
+*   Types和Java类很相似。
+    **   Types借鉴了JSON Schema，XSD，以及其他面向对象语言的类型的特性。
+*   你可以通过继承其他类型来定义一个新的类型。
+    **   和Java不同，RAML类型可以进行多继承。
+*   Types可以划分为四种：外部（扩展）类型、对象类型、数组类型、scalar（标量）类型。
+*   Types可以定义两种成员：**properties（属性）**和**facets（面）**。二者都可以被继承。
+    **   **Properties（属性）**非常常见，对象由属性组成。
+    **   **Facets（面）**是比较特别配置，你可以通过facet值的特征来描述类型。例如minLength（最小长度）和maxLength(最大长度）。
+*   只有对象类型可以声明属性，但所有的类型都可以声明facets（面）。
+*   你可以通过实现facets，给facets一个具体的值，从而指定scalar类型。
+*   为了指定一个对象类型，你需要定义属性。
 
-        *   Types borrow additional features from JSON Schema, XSD, and more expressive object oriented languages.
-*   You can define types that inherit from other types.
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-types[定义类型]
 
-        *   Multiple inheritance is allowed.
-*   Types are split into four families: external, object, array, and scalar.
-*   Types can define two types of members: **properties** and **facets**. Both are inherited.
-
-        *   **Properties** are regular, object oriented properties.
-    *   **Facets** are special __configurations__. You specialize types based on characteristics of facet values. Examples: minLength, maxLength
-*   Only object types can declare properties. All types can declare facets.
-*   To specialize a scalar type, you implement facets, giving already defined facets a concrete value.
-*   To specialize an object type, you define properties.
-
-=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-types[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Defining Types
-
-Types can be declared inline where the API expects data, in an OPTIONAL **types** node at the root of the API, or in an included library. To declare a type, you use a map where the key represents the name of the type and its value is a https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-declarations[type declaration].
+类型可以通过继承API预定义类型来声明一个新的类型，在API的根节点下，**types**节点是可选的，你也可以直接包含另一个RAML库。你应该使用 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-declarations[键值对（map）]的方式来声明一个类型，就像下面这样：
 
 [source,java]
 ----
@@ -338,26 +335,26 @@ types:
     # value is a type declaration
 ----
 
-=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-declarations[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Type Declarations
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-declarations[类型声明]
 
-A type declaration references another type, or wraps or extends another type by adding functional facets (e.g. properties) or non-functional facets (e.g. a description), or is a type expression that uses other types. Here are the facets that all type declarations can have; certain type declarations might have other facets:
+类型声明可以通过添加功能性facets（例如属性）或非功能性的facets（例如描述），来引用、封装或者继承其他类型，同样，也可以使用指代其他类型的**类型表达式**。下面的表格展示了所有类型声明可以使用的facet：
 
 |====
-| Facet | Description
-| default? | A default value for a type. When an API request is completely missing the instance of a type, for example when a query parameter described by a type is entirely missing from the request, then the API must act as if the API client had sent an instance of that type with the instance value being the value in the default facet. Similarly, when the API response is completely missing the instance of a type, the client must act as if the API server had returned an instance of that type with the instance value being the value in the default facet. A special case is made for URI parameters: for these, the client MUST substitute the value in the default facet if no instance of the URI parameter was given.
-| schema? | An alias for the equivalent "type" facet for compatibility with RAML 0.8. Deprecated - API definitions should use the "type" facet because the "schema" alias for that facet name might be removed in a future RAML version. The "type" facet supports XML and JSON schemas.
-| type? | The type which the current type extends or just wraps. The value of a type node MUST be either a) the name of a user-defined type or b) the name of a built-in RAML data type (object, array, or one of the scalar types) or c) an inline type declaration.
-| example? | An example of an instance of this type that can be used, for example, by documentation generators to generate sample values for an object of this type. The "example" facet MUST NOT be available when the "examples" facet is already defined. See section https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-examples-in-raml[Examples] for more information.
-| examples? | Examples of instances of this type. This can be used, for example, by documentation generators to generate sample values for an object of this type. The "examples" facet MUST NOT be available when the "example" facet is already defined. See section https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-examples-in-raml[Examples] for more information.
-| displayName? | An alternate, human-friendly name for the type
-| description? | A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown].
-| (<annotationName>)? | https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#annotations[Annotations] to be applied to this API. An annotation is a map having a key that begins with "(" and ends with ")" where the text enclosed in parentheses is the annotation name, and the value is an instance of that annotation.
-| facets? | A map of additional, user-defined restrictions that will be inherited and applied by any extending subtype. See section https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#user-defined-facets[User-defined Facets] for more information.
-| xml? | The capability to configure https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#xml-serialization-of-type-instances[XML serialization of this type instance].
-| enum? | An enumeration of all the possible values of instances of this type. The value is an array containing representations of these possible values; an instance of this type MUST be equal to one of these values.
+| Facet | 描述
+| default? | 类型的默认值。API请求如果没有找到实例的类型，例如一个查询参数没有被指定类型时，API必须将其指定为default中描述的一种默认类型。类似的，API响应如果没有指定实例类型，那么客户端必须将服务器响应的实例指定为default中描述的特定类型。URI参数则比较特殊，如果某个指定了默认facet的URI参数没有获取到，那么客户端必须用一个默认值来代替它。
+| schema? | 等价于"type"的别名，RAML 0.8中已经不再建议使用。后续的RAML API版本中会将此Facet移除，并用"type"来替代它。"type"同时支持XML和Json。
+| type? | 当前类型继承或封装的一个类型。它的值只能是：a) 用户自定义类型名； b) RAML预建类型名(object对象, array数组, 或者scalar类型； c) 一个内联（匿名）类型的声明。
+| example? | 一个关于此类型如何使用的示例。可以通过文档生成器来生成一个此类的对象的值，在"examples"facet被定义的时候，此facet不可用。详情参见 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-examples-in-raml[Examples]。
+| examples? | 此类型的示例（多个）。详情参见 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-examples-in-raml[Examples]。
+| displayName? | 可选的facet，用于向阅读者展示一个友好的名称。
+| description? | 类型的详细描述。它的值可以是字符串，也可以是 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown]格式。
+| (<annotationName>)? | 此API所使用的https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#annotations[注解]。每个注解都是用括号包围起来的键值对。
+| facets? | 附加的一个Map，它会为每一个继承此类型的子类型添加此facets限制。详情参见 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#user-defined-facets[用户自定义Facets] 。
+| xml? | 为此类型添加 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#xml-serialization-of-type-instances[类型实例的XML序列化]功能。
+| enum? | 此类型可用的枚举值，可以是数组。当配置此facet之后，此类型的值只能是此facet列表的值中的其中之一。
 |====
 
-The "schema" and "type" facets are mutually exclusive and synonymous: processors MUST NOT allow both to be specified, explicitly or implicitly, inside the same type declaration. Therefore, the following examples are invalid:
+"schema"和"type"这两个facets只能择一而使用，下面是两个错误的示例：
 
 [source,java]
 ----
@@ -379,4 +376,4 @@ types:
             type: # invalid as mutually exclusive with `schema`
 ----
 
-We recommended using the "type" facet instead of "schema" because the schema alias is deprecated and might be removed in a future RAML version. Also, the "type" facet supports XML and JSON schemas.
+官方更建议使用"type"来代替"schema"，因为schema在更新的RAML版本中不再推荐使用，并且"type"同时支持XML和JSON schema。
