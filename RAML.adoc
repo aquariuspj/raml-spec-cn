@@ -1,0 +1,382 @@
+= 用RAML来设计RESTful风格的API
+
+RAML全称是RESTful API Modeling Language（RESTful API建模语言），由MuleSoft公司成员主导设计。
+
+RAML的本质上是一组API设计规范，截止到2017年3月13日，最新版本是1.0。它基于YAML 1.2语法规范，从它的名字上可以看出，RAML主要是在API的设计阶段使用，它能够对RESTful API进行建模，然后导出文档、HTML模板以及多种编程语言的SDK，对于前后端分离的架构很有帮助。
+
+== 文档头
+
+RAML文档头部分描述了关于API的基本信息，还有类型和特征等辅助信息。
+
+RAML API文档中的节点可以以任意顺序出现。而RAML的处理器在解析时必须保存节点顺序，如果包含数组，那么还要保存数组中元素的顺序。
+
+下面GitHub v3公开API的一个RAML API定义的示例：
+
+[source,java]
+----
+#%RAML 1.0
+title: GitHub API
+version: v3
+baseUri: https://api.github.com
+mediaType:  application/json
+securitySchemes:
+  oauth_2_0: !include securitySchemes/oauth_2_0.raml
+types:
+  Gist:  !include types/gist.raml
+  Gists: !include types/gists.raml
+resourceTypes:
+  collection: !include types/collection.raml
+traits:
+securedBy: [ oauth_2_0 ]
+/search:
+  /code:
+    type: collection
+    get:
+----
+
+下表列出了RAML文档头中可以出现的节点：
+
+|====
+| 节点名 | 说明
+| title | 用于描述API的简短标题
+| description? | 字符串类型的API的具体描述，可以使用 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown] 格式。
+| version? | 说明API的版本，如"v1"，字符串类型。
+| baseUri? | 提供资源和服务的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#base-uri-and-base-uri-parameters[根URIs]。可以是 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[模板URI].
+| baseUriParameters? |  https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#base-uri-and-base-uri-parameters[根Uri]（模板）使用的参数名 。
+| protocols? | 此API支持的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#protocols[协议]。
+| mediaType? | 请求和响应报问题的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#default-media-types[默认媒体类型]，如"application/json"。
+| documentation? | API的附加 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#user-documentation[文档]。
+| schemas? | 在RAML 0.8中等价于"types"的别名，但新版本中不再推荐使用，因为"types"节点支持XML和JSON的schemas。
+| types? | https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-types[(数据)类型]声明。
+| traits? | https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#resource-types-and-traits[traits]的声明。
+| resourceTypes? | API使用的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#resource-types-and-traits[资源类型] 。
+| annotationTypes? | 注解使用的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#declaring-annotation-types[注解类型]声明。
+| (<annotationName>)? | API使用的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#annotations[注解]。注解是用圆括号包裹的键值映射，括号中是注解的名字，而值是注解的实例。
+| securitySchemes? | 对每个资源和方法使用的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#security-schemes[安全schemes]。
+| securedBy? | https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-security-schemes[安全schemes]。
+| uses? | 导入扩展 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#libraries[库] .
+| /<relativeUri>? | 以反斜杠开始的URIs相对路径，指代API资源。 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#resources-and-nested-resources[资源节点]总是以反斜杠开始的，它可以是根节点，也可以是子节点，例如 /users 和 /{groupId}。
+|====
+
+"schemas" 和 "types" 节点是互斥的同义词：处理器不允许在根级别同时处理两个以上的节点。我们建议用"types"节点替代"schemas"节点，因为我们将在未来的RAML版本中移除"schemas"别名。
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#user-documentation[用户文档]
+
+可选的**documentation**节点包含了各种文档，这些文档主要用做API的用户手册和和参考文档。例如文档可以清晰的描述API如何工作，并说明技术和业务的场景。
+
+documentation节点的值是一个或多个documents，每个document都必须是包含了下面两个键值对的映射：
+
+|====
+| 键值 | 描述
+| title | 文档标题，必须是非空字符串。
+| content | 文档内容。它必须是非空字符串，同时可以使用  https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown]格式。
+|====
+
+示例如下：
+
+[source,java]
+----
+#%RAML 1.0
+title: ZEncoder API
+baseUri: https://app.zencoder.com/api
+documentation:
+ - title: Home
+   content: |
+     Welcome to the _Zencoder API_ Documentation. The _Zencoder API_
+     allows you to connect your application to our encoding service
+     and encode videos without going through the web interface. You
+     may also benefit from one of our
+     [integration libraries](https://app.zencoder.com/docs/faq/basics/libraries)
+     for different languages.
+ - title: Legal
+   content: !include docs/legal.markdown
+----
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#base-uri-and-base-uri-parameters[Base URI 与 Base URI参数]
+
+可选的 **baseUri** 节点指定API的根URI，其值必须是一个字符串，同时还要符合 https://www.ietf.org/rfc/rfc2396.txt[RFC2396] 或者 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[URI模板]规范。
+
+如果 baseUri 值是一个 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[URI模板]，那么可以使用base URI参数：
+
+|====
+| URI Parameter | 值
+| version | 根级别版本的值
+|====
+
+任何出现在baseUri中的URI模板参数都可以通过 **baseUriParameters**  节点在API定义根路径下进行描述。baseUriParameters节点具有和 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uris-and-uri-parameters[uriParameters]一样的结构和语义，除此之外它还指定了URI中的参数。
+
+下面的 RAML API 定义使用了 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[URI模板]作为根URI：
+
+[source,java]
+----
+#%RAML 1.0
+title: Salesforce Chatter REST API
+version: v28.0
+baseUri: https://na1.salesforce.com/services/data/{version}/chatter
+----
+
+下面的例子明确指定了一个 base URI 参数：
+
+[source,java]
+----
+#%RAML 1.0
+title: Amazon S3 REST API
+version: 1
+baseUri: https://{bucketName}.s3.amazonaws.com
+baseUriParameters:
+  bucketName:
+    description: The name of the bucket
+----
+
+在baseAPI以一个或多个反斜杠（``/``)结束时，这些末尾的斜线会被忽略。例如下面两个资源的的相对路径是 ``http://api.test.com/common/users`` 和 ``http://api.test.com/common/users/groups``。
+
+[source,java]
+----
+baseUri: http://api.test.com/common/
+/users:
+  /groups:
+----
+
+下面的例子更复杂，它们的实际资源路径如下：``//api.test.com//common/``, ``//api.test.com//common//users/``, and ``//api.test.com//common//users//groups//``.
+
+[source,java]
+----
+baseUri: //api.test.com//common//
+/:
+  /users/:
+    /groups//:
+----
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#protocols[协议]
+
+可选的 **protocols** 节点说明了API支持的协议。如果 protocaols 没有明确指定，那么一或多个protocols会被包含在baseUri节点中。protocals节点必须是非空的字符串数组，可以是HTTP和/或HTTPS，不区分大小写。
+
+参见下方的示例：
+
+[source,java]
+----
+#%RAML 1.0
+title: Salesforce Chatter REST API
+version: v28.0
+protocols: [ HTTP, HTTPS ]
+baseUri: https://na1.salesforce.com/services/data/{version}/chatter
+----
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#default-media-types[默认请求类型]
+
+**mediaType**这个节点是可选的，它能设置默认的请求或响应类型，
+
+mediaType节点必须是一个字符串序列，它用于说明该URL的内容类型。你可以在 https://tools.ietf.org/html/rfc6838[RFC6838]这个网址去看看支持的媒体类型有哪些。
+
+下面给出了一个json类型的内容的RAML文档示例，这向用户说明：如果请求中没有明确指定媒体类型，那么此API只会接受和响应JSON格式的内容。
+
+[source,java]
+----
+#%RAML 1.0
+title: New API
+mediaType: application/json
+----
+
+下面这个示例展示了一个可以同时接收和返回Json或xml的RAML片段。
+
+[source,java]
+----
+#%RAML 1.0
+title: New API
+mediaType: [ application/json, application/xml ]
+----
+
+你可以明确指定哪些类型的内容（Json或xml）可用于哪种请求（POST或GET操作）。下面的片段说明了 ``/list`` 会返回一个JSON或XML的资源，而``/send``只会默认返回JSON类型的资源。详情参见
+ https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#bodies[body]。
+
+[source,java]
+----
+#%RAML 1.0
+title: New API
+mediaType: [ application/json, application/xml ]
+types:
+  Person:
+  Another:
+/list:
+  get:
+    responses:
+      200:
+        body: Person[]
+/send:
+  post:
+    body:
+      application/json:
+        type: Another
+----
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#default-security[默认的安全设置]
+
+**securedBy**节点是可选的，它可以用来设置默认的安全schemes，从而为API的每一个资源的每一个方法添加保护。该节点的值可以是多个security scheme的name。详情参见 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-security-schemes[Applying Security Schemes]，里面说明了应用程序如何通过继承机制解析多个security schemes。
+
+下面的示例展示了一个API，它允许通过OAuth 2.0或者OAuth 1.1协议进行访问：
+
+[source,java]
+----
+#%RAML 1.0
+title: Dropbox API
+version: 1
+baseUri: https://api.dropbox.com/{version}
+securedBy: [ oauth_2_0, oauth_1_0 ]
+securitySchemes:
+  oauth_2_0: !include securitySchemes/oauth_2_0.raml
+  oauth_1_0: !include securitySchemes/oauth_1_0.raml
+----
+
+== RAML 数据类型
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#introduction-1[简介]
+
+RAML 1.0提出了**数据类型**的概念，它提供了一种便捷而有力的描述API数据的方式。数据类型可以对数据的类型进行声明，从而为其添加可校验的特性。
+
+数据类型可以描述URI的资源、查询参数、请求或响应头，甚至是请求或响应报文体。数据类型可以是预建的或是自定义的。预建的类型可以用于描述出现在API的任何地方的数据。自定义类型可以通过继承的方式，由预建的类型进行衍生，然后像预建的类型那样使用。继承的类型无法创建任何循环依赖，但可以被内联继承。
+
+下面展示了一个RAML示例，它定义了一个User类型，并且声明了firstname, lastname, 以及 age 三个属性，这三个属性分别使用了预建的string和number类型。最后，我们在payload中使用了这个User类型（schema）。
+
+[source,java]
+----
+#%RAML 1.0
+title: API with Types
+types:
+  User:
+    type: object
+    properties:
+      firstname: string
+      lastname:  string
+      age:       number
+/users/{id}:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: User
+----
+
+RAML类型声明类似于JSON schema定义。事实上，RAML类型可以用于替代JSON和XML schemas，或者用于作为补充。RAML类型的语法被设计得更易于使用，并且比JSON和XML的schemas更简洁，甚至比它们更灵活且更具有表现力。下面的片段展示了多个类型声明的示例：
+
+[source,java]
+----
+#%RAML 1.0
+title: My API with Types
+mediaType: application/json
+types:
+  Org:
+    type: object
+    properties:
+      onCall: AlertableAdmin
+      Head: Manager
+  Person:
+    type: object
+    properties:
+      firstname: string
+      lastname:  string
+      title?:    string
+  Phone:
+    type: string
+    pattern: "[0-9|-]+"
+  Manager:
+    type: Person
+    properties:
+      reports: Person[]
+      phone:  Phone
+  Admin:
+    type: Person
+    properties:
+      clearanceLevel:
+        enum: [ low, high ]
+  AlertableAdmin:
+    type: Admin
+    properties:
+      phone: Phone
+  Alertable: Manager | AlertableAdmin
+/orgs/{orgId}:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: Org
+----
+
+
+=== 概览
+
+This section is informative.
+
+The RAML type system borrows from object oriented programming languages such as Java, as well as from XSD and JSON Schemas.
+
+RAML Types in a nutshell:
+
+*   Types are similar to Java classes.
+
+        *   Types borrow additional features from JSON Schema, XSD, and more expressive object oriented languages.
+*   You can define types that inherit from other types.
+
+        *   Multiple inheritance is allowed.
+*   Types are split into four families: external, object, array, and scalar.
+*   Types can define two types of members: **properties** and **facets**. Both are inherited.
+
+        *   **Properties** are regular, object oriented properties.
+    *   **Facets** are special __configurations__. You specialize types based on characteristics of facet values. Examples: minLength, maxLength
+*   Only object types can declare properties. All types can declare facets.
+*   To specialize a scalar type, you implement facets, giving already defined facets a concrete value.
+*   To specialize an object type, you define properties.
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-types[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Defining Types
+
+Types can be declared inline where the API expects data, in an OPTIONAL **types** node at the root of the API, or in an included library. To declare a type, you use a map where the key represents the name of the type and its value is a https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-declarations[type declaration].
+
+[source,java]
+----
+types:
+  Person: # key name
+    # value is a type declaration
+----
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-declarations[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Type Declarations
+
+A type declaration references another type, or wraps or extends another type by adding functional facets (e.g. properties) or non-functional facets (e.g. a description), or is a type expression that uses other types. Here are the facets that all type declarations can have; certain type declarations might have other facets:
+
+|====
+| Facet | Description
+| default? | A default value for a type. When an API request is completely missing the instance of a type, for example when a query parameter described by a type is entirely missing from the request, then the API must act as if the API client had sent an instance of that type with the instance value being the value in the default facet. Similarly, when the API response is completely missing the instance of a type, the client must act as if the API server had returned an instance of that type with the instance value being the value in the default facet. A special case is made for URI parameters: for these, the client MUST substitute the value in the default facet if no instance of the URI parameter was given.
+| schema? | An alias for the equivalent "type" facet for compatibility with RAML 0.8. Deprecated - API definitions should use the "type" facet because the "schema" alias for that facet name might be removed in a future RAML version. The "type" facet supports XML and JSON schemas.
+| type? | The type which the current type extends or just wraps. The value of a type node MUST be either a) the name of a user-defined type or b) the name of a built-in RAML data type (object, array, or one of the scalar types) or c) an inline type declaration.
+| example? | An example of an instance of this type that can be used, for example, by documentation generators to generate sample values for an object of this type. The "example" facet MUST NOT be available when the "examples" facet is already defined. See section https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-examples-in-raml[Examples] for more information.
+| examples? | Examples of instances of this type. This can be used, for example, by documentation generators to generate sample values for an object of this type. The "examples" facet MUST NOT be available when the "example" facet is already defined. See section https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-examples-in-raml[Examples] for more information.
+| displayName? | An alternate, human-friendly name for the type
+| description? | A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown].
+| (<annotationName>)? | https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#annotations[Annotations] to be applied to this API. An annotation is a map having a key that begins with "(" and ends with ")" where the text enclosed in parentheses is the annotation name, and the value is an instance of that annotation.
+| facets? | A map of additional, user-defined restrictions that will be inherited and applied by any extending subtype. See section https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#user-defined-facets[User-defined Facets] for more information.
+| xml? | The capability to configure https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#xml-serialization-of-type-instances[XML serialization of this type instance].
+| enum? | An enumeration of all the possible values of instances of this type. The value is an array containing representations of these possible values; an instance of this type MUST be equal to one of these values.
+|====
+
+The "schema" and "type" facets are mutually exclusive and synonymous: processors MUST NOT allow both to be specified, explicitly or implicitly, inside the same type declaration. Therefore, the following examples are invalid:
+
+[source,java]
+----
+types:
+  Person:
+    schema: # invalid as mutually exclusive with `type`
+    type: # invalid as mutually exclusive with `schema`
+----
+
+[source,java]
+----
+/resource:
+  get:
+    responses:
+      200:
+        body:
+          application/json: # start type declaration
+            schema: # invalid as mutually exclusive with `type`
+            type: # invalid as mutually exclusive with `schema`
+----
+
+We recommended using the "type" facet instead of "schema" because the schema alias is deprecated and might be removed in a future RAML version. Also, the "type" facet supports XML and JSON schemas.
