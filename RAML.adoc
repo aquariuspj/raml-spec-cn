@@ -576,13 +576,13 @@ types:
         type: string
 ----
 
-If a pattern property regular expression also matches an explicitly declared property, the explicitly declared property definition prevails. If two or more pattern property regular expressions match a property name in an instance of the data type, the first one prevails.
+如果pattern属性正则表达式同时匹配了一个已经被明确声明的属性，那么正则将让位于明确声明的属性。如果同时有两个正则表达式同时匹配了一个属性名，那么先声明的正则优先。
 
-Moreover, if ``additionalProperties`` is ``false`` (explicitly or by inheritance) in a given type definition, then explicitly setting pattern properties in that definition is not allowed. If ``additionalProperties`` is ``true`` (or omitted) in a given type definition, then pattern properties are allowed and further restrict the additional properties allowed in that type.
+更进一步，如果对于给定的类型定义，``additionalProperties``是``false``(显式或内联方式指定)，那么就不允许使用partten属性；相反，如果``additionalProperties``是``true``（或未指定），那么则允许使用pattern属性。
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#object-type-specialization[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Object Type Specialization
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#object-type-specialization[对象类型的特性]
 
-You can declare object types that inherit from other object types. A sub-type inherits all the properties of its parent type. In the following example, the type ``Employee`` inherits all properties of its parent type ``Person``.
+你可以通过继承其他对象类型来声明对象类型。子类会继承父类所有的属性。在下列示例中，``Employee``继承了父类``Person``的所有属性：
 
 [source,java]
 ----
@@ -601,17 +601,17 @@ types:
         type: string
 ----
 
-A sub-type can override properties of its parent type with the following restrictions: 1) a required property in the parent type cannot be changed to optional in the sub-type, and 2) the type declaration of a defined property in the parent type can only be changed to a narrower type (a specialization of the parent type) in the sub-type.
+子类还可以重写父类的属性，但有如下两个约束：1) 父类中的必填属性无法在子类中改为可选属性； 2) 父类中声明的属性在子类中只能具象化为更明确的类型，而不能被修改为其他类型。
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#using-discriminator[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Using Discriminator
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#using-discriminator[使用鉴别器]
 
-When payloads contain ambiguous types due to unions or inheritance, it is often impossible to discriminate the concrete type of an individual object at runtime. For example, when deserializing the payload into a statically typed language, this problem can occur.
+当payloads由于组合或者继承的原因包含了一个模糊类型的时候，它通常能在运行时确定为不同类型的实例，这在payload被反序列化为静态类型语言时经常发生。
 
-A RAML processor might provide an implementation that automatically selects a concrete type from a set of possible types, but a simpler alternative is to store some unique value associated with the type inside the object.
+RAML处理器可以提供一种自动选择类型的机制，一个简单办法是通过关联的类型对象中某些唯一的特征来确定运行时类型。
 
-You set the name of an object property using the ``discriminator`` facet. The name of the object property is used to discriminate the concrete type. The ``discriminatorValue`` stores the actual value that might identify the type of an individual object. By default, the value of ``discriminatorValue`` is the name of the type.
+你可以使用``discriminator`` facet来设置对象属性的名字。该名字的对象属性会被用于鉴别更具体的类型。``discriminatorValue``可以用于保存标识某一具体对象的类型的值。默认情况下，``discriminatorValue``和类型名相同。
 
-Here's an example that illustrates how to use ``discriminator``:
+下面是使用``discriminator``的示例：
 
 [source,java]
 ----
@@ -645,7 +645,7 @@ data:
     kind: Employee
 ----
 
-You can also override the default for ``discriminatorValue`` for each individual concrete class. The following example replaces the default value of ``discriminatorValue`` in initial caps with lowercase:
+你也可以为每个类重写``discriminatorValue``。下面的示例通过小写字母来重新指定``discriminatorValue的默认值：
 
 [source,java]
 ----
@@ -681,7 +681,7 @@ data:
     kind: employee
 ----
 
-Neither ``discriminator`` nor ``discriminatorValue`` can be defined for any inline type declarations or union types.
+``discriminator``和``discriminatorValue``都不能用于内联类型或者组合类型。
 
 [source,java]
 ----
@@ -710,23 +710,23 @@ PersonOrDog:
    discriminator: hasTail
 ----
 
-==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#array-type[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Array Type
+==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#array-type[数组类型]
 
-Array types are declared by using either the array qualifier ``[]`` at the end of a https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-expressions[type expression] or ``array`` as the value of a ``type`` facet. If you are defining a top-level array type, such as the ``Emails`` in the examples below, you can declare the following facets in addition to those previously described to further restrict the behavior of the array type.
+数组类型可以用方括号``[]``这种 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-expressions[类型表达式]来标识，也可以在``type`` facet中使用``array``值来指定。如果你定义了一个顶级数组类型，例如``Emails``，那么你可以通过下列facet来对数组类型进行进一步的约束：
 
 |====
-| Facet | Description
-| uniqueItems? | Boolean value that indicates if items in the array MUST be unique.
-| items? | Indicates the type all items in the array are inherited from. Can be a reference to an existing type or an inline https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-declaration[type declaration].
-| minItems? | Minimum amount of items in array. Value MUST be equal to or greater than 0.  
+| Facet | 说明
+| uniqueItems? | 布尔值。可以用于指示此数组的元素是否必须唯一。
+| items? | 表明此数组的元素继承自哪里。可以引用已存在的类型，也可以引用内联 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-declaration[类型声明]。
+| minItems? | 数组中最少需要几个元素。此值必须大于等于0。
 
-**Default:** ``0``.
-| maxItems? | Maximum amount of items in array. Value MUST be equal to or greater than 0.  
+**默认值：** ``0``.
+| maxItems? | 数组中最多能用几个元素，此值必须大于等于0。  
 
-**Default:** ``2147483647``.
+**默认值：** ``2147483647``.
 |====
 
-Both of the following examples are valid:
+下列两个示例都是有效的：
 
 [source,java]
 ----
@@ -764,28 +764,28 @@ types:
     uniqueItems: true
 ----
 
-Using ``Email[]`` is equivalent to using ``type: array``. The ``items`` facet defines the ``Email`` type as the one each array item inherits from.
+type facet中使用 ``Email[]``和使用``type: array``是等价的。``items`` facet定义了每个数组元素都必须继承自``Email``类型。
 
-==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#scalar-types[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Scalar Types
+==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#scalar-types[Scalar类型]
 
-RAML defines a set of built-in scalar types, each of which has a predefined set of restrictions.
+RAML定义了一些预建的scalar类型，它们都必须遵从一些预定义的约束。
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#string[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]String
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#string[字符串string]
 
-A JSON string with the following additional facets:
+JSON字符串具有如下facets：
 
 |====
-| Facet | Description
-| pattern? | Regular expression that this string should match.
-| minLength? | Minimum length of the string. Value MUST be equal to or greater than 0.  
+| Facet | 说明
+| pattern? | 此字符串必须匹配的正则表达式。
+| minLength? | 此字符串的最小长度，必须大于等于0。
 
-**Default:** ``0``
-| maxLength? | Maximum length of the string. Value MUST be equal to or greater than 0.  
+**默认值：** ``0``
+| maxLength? | 此字符串的最大长度，必须大于等于0。
 
-**Default:** ``2147483647``
+**默认值：** ``2147483647``
 |====
 
-Example:
+示例：
 
 [source,java]
 ----
@@ -797,19 +797,20 @@ types:
     pattern: ^note\d+$
 ----
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#number[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Number
 
-Any JSON number including https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#integer[integer] with the following additional facets:
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#number[数字Number]
+
+任何JSON数字（ https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#integer[整型integer]也算）都包含以下facets：
 
 |====
-| Facet | Description
-| minimum? | The minimum value of the parameter. Applicable only to parameters of type number or integer.
-| maximum? | The maximum value of the parameter. Applicable only to parameters of type number or integer.
-| format? | The format of the value. The value MUST be one of the following: int32, int64, int, long, float, double, int16, int8
-| multipleOf? | A numeric instance is valid against "multipleOf" if the result of dividing the instance by this keyword's value is an integer.
+| Facet | 说明
+| minimum? | 此参数的最小值，此facet只能用于number或者integer。
+| maximum? | 此参数的最大值，此facet只能用于number或者integer。
+| format? | 此值的格式，只能是 int32, int64, int, long, float, double, int16, int8 其中之一。
+| multipleOf? | 如果数值能够被multipleOf中的值整除，那么它是一个有效值。
 |====
 
-Example:
+例如：
 
 [source,java]
 ----
@@ -822,9 +823,9 @@ types:
     multipleOf: 4
 ----
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#integer[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Integer
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#integer[整型Integer]
 
-A subset of JSON numbers that are positive and negative multiples of 1. The integer type inherits its facets from the https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#number[number type].
+JSON numbers的子集，包含正整数和负整数。integer类型从 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#number[数值类型number]集成了它的facets。
 
 [source,java]
 ----
@@ -837,9 +838,9 @@ types:
     multipleOf: 1
 ----
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#boolean[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Boolean
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#boolean[布尔型Boolean]
 
-A JSON boolean without any additional facets.
+JSON布尔类型没有任何facets。
 
 [source,java]
 ----
@@ -848,19 +849,21 @@ types:
     type: boolean
 ----
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#date[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Date
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#date[日期Date]
 
-The following date type representations MUST be supported:
+必须支持如下日期类型：
+
 
 |====
 | Type | Description
-| date-only | The "full-date" notation of http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14[RFC3339], namely ``yyyy-mm-dd``. Does not support time or time zone-offset notation.
-| time-only | The "partial-time" notation of http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14[RFC3339], namely hh:mm:ss[.ff...]. Does not support date or time zone-offset notation.
-| datetime-only | Combined date-only and time-only with a separator of "T", namely yyyy-mm-ddThh:mm:ss[.ff...]. Does not support a time zone offset.
-| datetime | A timestamp in one of the following formats: if the __format__ is omitted or set to ``rfc3339``, uses the "date-time" notation of http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14[RFC3339]; if __format__ is set to ``rfc2616``, uses the format defined in https://www.ietf.org/rfc/rfc2616.txt[RFC2616].
+| date-only | http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14[RFC3339]规范中的全日期符号，格式是``yyyy-mm-dd``。不支持时间与时区时间的符号。
+| time-only | http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14[RFC3339]规范中的时间部分，格式是 ``hh:mm:ss[.ff...]``。不支持日期或者时区时间的符号。
+| datetime-only | 将date-only与time-only结合，并通过T分割，格式为 ``yyyy-mm-ddThh:mm:ss[.ff...]``。不支持时区时间。
+| datetime | 下列格式之一的时间戳： 如果 __format__ 未指定，或者指定了 ``rfc3339``，那么使用 http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14[RFC3339]规范中``date-time``的格式，如果 __format__被指定为 ``rfc2616``，那么则使用 https://www.ietf.org/rfc/rfc2616.txt[RFC2616]规范定义的格式。
 |====
 
-The additional facet __format__ MUST be available only when the type equals __datetime__, and the value MUST be either ``rfc3339`` or ``rfc2616``. Any other values are invalid.
+
+只有在类型是 __datetime__ 的时候 __format__ 这个facet才能够起作用，并且 __format__ 的值必须是 ``rfc3339`` 或者 ``rfc2616`` 二者之一，任何其他的值都是无效的。
 
 [source,java]
 ----
@@ -884,19 +887,19 @@ types:
     format: rfc2616 # this time it's required, otherwise, the example format is invalid
 ----
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#file[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]File
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#file[文件File]
 
-The ​**file**​ type can constrain the content to send through forms. When this type is used in the context of web forms it SHOULD be represented as a valid file upload in JSON format. File content SHOULD be a base64-encoded string.
+**file**类型可以包含从表单发送过来的内容。在这一类型用于web表单内容提交时，它应该是通过有效的JSON格式进行提交。文件内容应该编码为base64字符串。
 
 |====
-| Facet | Description
-| fileTypes? | A list of valid content-type strings for the file. The file type ``*/*`` MUST be a valid value.
-| minLength? | Specifies the minimum number of bytes for a parameter value. The value MUST be equal to or greater than 0.  
+| Facet | 说明
+| fileTypes? | 文件中有效内容类型的字符串的列表。文件类型为 ``*/*`` 时必须是一个有效值。
+| minLength? | 指定参数的最小字节数，此值必须大于等于0。
 
-**Default:** ``0``
-| maxLength? | Specifies the maximum number of bytes for a parameter value. The value MUST be equal to or greater than 0.  
+**默认值：** ``0``
+| maxLength? | 指定参数的最大字节数，此值必须大于等于0。
 
-**Default:** ``2147483647``
+**默认值：** ``2147483647``
 |====
 
 [source,java]
@@ -908,15 +911,15 @@ types:
     maxLength: 307200
   customFile:
     type: file
-    fileTypes: ['*/*'] # any file type allowed
+    fileTypes: ['*/*'] # 允许任一文件类型。
     maxLength: 1048576
 ----
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#nil-type[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Nil Type
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#nil-type[空类型Nil]
 
-​ In RAML, the type ``nil`` is a scalar type that allows only nil data values. Specifically, in YAML it allows only YAML's ``null`` (or its equivalent representations, such as ``~``), in JSON it allows only JSON's ``null``, and in XML it allows only XML's ``xsi:nil``. In headers, URI parameters, and query parameters, the ``nil`` type only allows the string value "nil" (case-sensitive); and in turn an instance having the string value "nil" (case-sensitive), when described with the ``nil`` type, deserializes to a nil value.
+在RAML中，``nil``是一种scalar类型，它只允许nil（空）数据值。特别的，YAML中只允许YAML的``null``（或者等价的``~``），JSON中只允许JSON的``null``，XML中只允许XML的 ``xsi:nil``。在头部，URI参数和查询参数中，``nil``类型只允许字符串值"nil"(大小写敏感)；反过来，如果在字符串中发现了"nil"值（大小写敏感），那么说明它的类型是nil，它将被反序列化为nil值。
 
-In the following example, the type of an object and has two required properties, ``name`` and ``comment``, both defaulting to type ``string``. In ``example``, ``name`` is assigned a string value, but comment is nil and this is __not__ allowed because RAML expects a string.
+在下列示例中，对象类型具有两个必填参数，``name``和``comment``，二者默认类型都是``string``。在``example``中，``name``被分配了一个字符串值，但comment是nil，但这是不被允许的，因为RAML只接收字符串。
 
 [source,java]
 ----
@@ -928,12 +931,10 @@ types:
       comment:
     example:
       name: Fred
-      comment: # Providing no value here is not allowed.
+      comment: # 不允许不填值。
 ----
 
-The following example shows the assignment of the ``nil`` type to ``comment``:
-
-​
+下列示例展示了给``comment``一个``nil``类型。
 
 [source,java]
 ----
@@ -945,10 +946,10 @@ types:
       comment: nil
     example:
       name: Fred
-      comment: # Providing a value here is not allowed.
+      comment: # 不允许给值。
 ----
 
-The following example shows how to represent nilable properties using a union: ​
+下列示例展示了如何在组合中使用可空（nilable）属性：
 
 [source,java]
 ----
@@ -961,14 +962,14 @@ types:
                              # comment: string?
     example:
       name: Fred
-      comment: # Providing a value or not providing a value here is allowed.
+      comment: # 无论是否提供值给它都可以。
 ----
 
-Declaring the type of a property to be ``nil`` represents the lack of a value in a type instance. In a RAML context that requires __values__ of type ``nil`` (vs just type declarations), the usual YAML ``null`` is used, e.g. when the type is ``nil | number`` you may use ``enum: [ 1, 2, ~ ]`` or more explicitly/verbosely ``enum: [ 1, 2, !!null "" ]``; in non-inline notation you can just omit the value completely, of course.
+声明属性的类型为``nil``，意味着类型实例中缺乏该值。在RAML上下文中需要一个``nil``类型的值（相对于类型声明），在YAML中通常使用``null``。如果type是 ``nil | number``，那么你可以使用 ``enum: [ 1, 2, ~]``，或者更进一步 ``enum: [ 1, 2, !!null ""]`` ；在非内联符号中，你也可以完全忽略此值。
 
-==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#union-type[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Union Type
+==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#union-type[组合类型]
 
-A union type is used to allow instances of data to be described by any of several types. A union type is declared via a type expression that combines 2 or more types delimited by pipe (``|``) symbols; these combined types are referred to as the union type's super types. In the following example, instances of the ``Device`` type may be described by either the ``Phone`` type or the ``Notebook`` type:
+组合类型允许数据的类型从多个类型中择一而用。组合类型通过使用竖线(``|``)来连接多个类型来使用，这些被连接起来的类型被当做组合类型的超类。在下列示例中，``Device``类型可以是``Phone``或者``Notebook``这两个类型的其中之一。
 
 [source,java]
 ----
@@ -995,9 +996,9 @@ types:
     type: Phone | Notebook
 ----
 
-An instance of a union type is valid if and only if it meets all restrictions associated with at least one of the super types. More generally, an instance of a type that has a union type in its type hierarchy is valid if and only if it is a valid instance of at least one of the super types obtained by expanding all unions in that type hierarchy. Such an instance is deserialized by performing this expansion and then matching the instance against all the super types, starting from the left-most and proceeding to the right; the first successfully-matching base type is used to deserialize the instance.
+当且仅当它满足其中一个父类的全部约束时，联合类型的实例才是有效的。当且仅当实例是至少一个超类的有效实例，并且此超类可以由类层次中通过扩展全部组合类型来获取到，那么此实例才是有效的。当一个实例被通过操作这一扩展，并且为所有超类匹配其实例来进行反序列化操作时，从最左边开始处理到最右边；在首次找到成功匹配的基类时，那就用它来反序列化此实例。
 
-The following example defines two types and a third type which is a union of those two types.
+下列示例定义了两个类型和一个包含了二者的第三个联合类型：
 
 [source,java]
 ----
@@ -1016,7 +1017,7 @@ types:
       fangs: string
 ----
 
-The following example of an instance of type ``CatOrDog`` is valid:
+下列示例是一个有效的``CatOrDog``实例：
 
 [source,java]
 ----
@@ -1025,7 +1026,7 @@ CatOrDog: # follows restrictions applied to the type 'Cat'
   color: brown
 ----
 
-Imagine a more complex example of a union type used in a multiple inheritance type expression:
+想象一下一个更复杂的联合类示例，它使用了多继承：
 
 [source,java]
 ----
@@ -1047,11 +1048,11 @@ types:
    HomeAnimal: [ HasHome ,  Dog | Cat ]
 ----
 
-In this case, type ``HomeAnimal`` has two super types, ``HasHome`` and an anonymous union type, defined by the following type expression: ``Dog | Cat``.
+这种情况下，``HomeAnimal``具有两个超类，``HasHome``和一个匿名联合类，它通过``Dog | Cat``这个类型表达式来定义。
 
-Validating the ``HomeAnimal`` type involves validating the types derived from each of the super types and the types of each element in the union type. In this particular case, the processor MUST test that types ``[HasHome, Dog]`` and ``[HasHome, Cat]``are valid types.
+对``HomeAnimal``类型的验证包含了对它的每一个父类的验证，以及联合类型中每一个元素类型的验证。在这种特殊情况下，处理器必须测试``[HasHome, Dog]``和``[HasHome, Cat]``是否是有效类型。
 
-If you are extending from two union types a processor MUST perform validations for every possible combination. For example, to validate the ``HomeAnimal`` type shown below, the processor MUST test the six possible combinations: ``[HasHome, Dog ]``, ``[HasHome, Cat ]``, ``[HasHome, Parrot]``, ``[IsOnFarm, Dog ]``, ``[IsOnFarm, Cat ]``, and ``[IsOnFarm, Parrot]``.
+如果你继承了两个联合类型，处理器必须对每个可能的组合进行校验。例如，校验下述``HomeAnimal``类型时，处理器必须测试六种可能的组合：``[HasHome, Dog ]``, ``[HasHome, Cat ]``, ``[HasHome, Parrot]``, ``[IsOnFarm, Dog ]``, ``[IsOnFarm, Cat ]``, and ``[IsOnFarm, Parrot]``。
 
 [source,java]
 ----
@@ -1059,11 +1060,11 @@ types:
    HomeAnimal: [ HasHome | IsOnFarm ,  Dog | Cat | Parrot ]
 ----
 
-==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#using-xml-and-json-schema[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Using XML and JSON Schema
+==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#using-xml-and-json-schema[使用XML和JSON Schema]
 
-RAML allows the use of XML and JSON schemas to describe the body of an API request or response by integrating the schemas into its data type system.
+RAML允许使用XML和JSON schema来描述API请求和响应的报文体，这一功能通过把schemas集成到数据类型系统中来实现。
 
-The following examples show how to include an external JSON schema into a root-level type definition and a body declaration.
+下列示例展示了如何包含一个扩展的JSON schema到顶层类型定义中以及报文体声明中：
 
 [source,java]
 ----
@@ -1082,9 +1083,9 @@ types:
             type: !include person.json
 ----
 
-A RAML processor MUST NOT allow types that define an XML or JSON schema to participate in type inheritance or specialization, or effectively in any https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-expressions[type expression]. Therefore, you cannot define sub-types of these types to declare new properties, add restrictions, set facets, or declare facets. You can, however, create simple type wrappers that add annotations, examples, display name, or a description.
+RAML处理器不允许对XML或JSON schema中定义的类型进行任何继承或专门化，也不允许他们出现在有效的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-expressions[类型表达式]中。因此，你无法定义这些类的子类，也无法为它们声明任何新的属性，无法添加约束，设置facets，也无法声明facets。但你可以通过添加annotations、examples、display name或者description来对它们进行简单封装。
 
-The following example shows a valid declaration.
+下列示例展示了一个有效声明：
 
 [source,java]
 ----
@@ -1094,7 +1095,7 @@ types:
     description: this is a schema describing person
 ----
 
-The following example shows an invalid declaration of a type that inherits the characteristics of a JSON schema and adds additional properties.
+下列示例展示了一个无效的类型声明，因为它继承了JSON schema的特征，并添加了附加属性：
 
 [source,java]
 ----
@@ -1105,7 +1106,7 @@ types:
       single: boolean
 ----
 
-Another invalid case is shown in the following example of the type ``Person`` being used as a property type.
+下面是另一个无效示例，因为``Person``在另一个类型中被当作一个属性类型来使用：
 
 [source,java]
 ----
@@ -1118,21 +1119,21 @@ types:
       members: Person[] # invalid use of type expression '[]' and as a property type
 ----
 
-A RAML processor MUST be able to interpret and apply JSON Schema and XML Schema.
+RAML处理器必须能够解释、使用JSON schema和XML schema。
 
-An XML schema, or JSON schema, MUST NOT be used where the media type does not allow XML-formatted data, or JSON-formatted data, respectively. XML and JSON schemas are also forbidden in any declaration of query parameters, query string, URI parameters, and headers.
+XML schema或者JSON schema禁止用于不支持XML格式或JSON格式的媒体类型数据。XML和JSON schemas也禁止声明与查询参数、查询字符串、URI参数和报文头。
 
-The nodes "schemas" and "types", as well as "schema" and "type", are mutually exclusive and synonymous for compatibility with RAML 0.8. API definitions should use "types" and "type", as "schemas" and "schema" are deprecated and might be removed in a future RAML version.
+``schemas``、``types``节点和``schema``、``type``节点类似，它们是同义词，并且相互排斥。但你更应该使用``types``或者``type``，因为``schemas``和``schema``在未来的RAML版本中可能会被移除。
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#references-to-inner-elements[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]References to Inner Elements
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#references-to-inner-elements[引用内部元素]
 
-Sometimes it is necessary to refer to an element defined in a schema. RAML supports that by using URL fragments as shown in the example below.
+有时候，引用在schema中定义的元素非常重要。RAML允许你通过URL fragment进行引用，就像下面这样：
 
 ----
 type: !include elements.xsd#Foo
 ----
 
-When referencing an inner element of a schema, a RAML processor MUST validate an instance against that particular element. The RAML specification supports referencing any inner elements in JSON schemas that are valid schemas, any globally defined elements, and complex types in XML schemas. There are only a few restrictions:
+在引用一个schema的内部元素时，RAML处理器必须对它进行一些特殊校验。RAML规范支持引用任何有效的JSON schema中的内部元素、任何全局定义元素、XML schemas中的复杂类型。但有如下限制：
 
-*   Validation of any XML or JSON instance against inner elements follows the same restrictions as the validation against a regular XML or JSON schema.
-*   Referencing complex types inside an XSD is valid to determine the structure of an XML instance, but since complex types do not define a name for the top-level XML element, these types cannot be used for serializing an XML instance.
+*   校验XML或者JSON实例的内部元素时，必须对XML或者JSON schema进行同样的校验。 
+*   对于XML实例结构的判断，可以引用XSD中的复杂类型，但如果复杂类型没有在顶级XML元素中定义一个名字，那么此类型无法用于序列化XML实例。
