@@ -1,4 +1,4 @@
-= 用RAML来设计RESTful风格的API
+= RAML规范
 
 RAML全称是RESTful API Modeling Language（RESTful API建模语言），由MuleSoft公司成员主导设计。
 
@@ -412,13 +412,13 @@ image::images/Image-070417-112719.432.png[]
 | additionalProperties? | 此对象实例是否包含 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#additional-properties[附加的属性]。  
 
 **默认值：** ``true``
-| discriminator? | Determines the concrete type of an individual object at runtime when, for example, payloads contain ambiguous types due to unions or inheritance. The value must match the name of one of the declared ``properties`` of a type. Unsupported practices are inline type declarations and https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#using-discriminator[using ``discriminator``] with non-scalar properties.
-| discriminatorValue? | Identifies the declaring type. Requires including a ``discriminator`` facet in the type declaration. A valid value is an actual value that might identify the type of an individual object and is unique in the hierarchy of the type. Inline type declarations are not supported.  
+| discriminator? | 由于联合或者继承会导致payloads包含一个模糊的类型，所以可能需要在运行时分辨一个类的具体类型。此facet的值可以是一个已声明的类型的``属性``名。在内联（匿名）类中无法使用，也无法使用非scalar属性 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#using-discriminator[进行辨别]。
+| discriminatorValue? | 标识声明的类型，只能用于声明了``discriminator``facet的类型中。它的值必须能够在类型的层次中唯一标识一个对象。此facet不支持内联类型声明。 
 
-**Default:** The name of the type
+**默认值：** 类型的名字。
 |====
 
-An object type is created by explicit inheritance from the built-in type object:
+对象类型必须显式继承自预建的object类型：
 
 [source,java]
 ----
@@ -433,20 +433,20 @@ types:
         type: string
 ----
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#property-declarations[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Property Declarations
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#property-declarations[属性声明]
 
-Properties of object types are defined using the OPTIONAL **properties** facet. The RAML Specification calls the value of the "properties" facet a "properties declaration". The properties declaration is a map of keys and values. The keys are valid property names for declaring a type instance. The values are either a name of a type or an inline type declaration.
+对象类型的属性由可选的**properties** facet进行定义。RAML规范把"properties" facet的值叫做 "属性声明"。属性声明是一个键值对，键是可以用于类型实例的有效属性名，值是类型名或内联（匿名）类型声明。
 
-The properties declaration can specify whether a property is required or optional.
+无论属性是必须的还是可选的，属性声明都可以被指定。
 
 |====
-| Facet | Description
-| required? | Specifies that the property is required or not.  
+| Facet | 描述
+| required? | 指定一个属性是否是必须的。
 
-**Default:** ``true``.
+**默认值：** ``true``.
 |====
 
-The following example declares an object type having two properties:
+下面的示例为一个对象类型声明了两个属性：
 
 [source,java]
 ----
@@ -461,7 +461,7 @@ types:
         type: number
 ----
 
-The following example shows a common idiom:
+下列示例展示了一个通用的惯例：
 
 [source,java]
 ----
@@ -477,9 +477,7 @@ types:
                    #  required: false
 ----
 
-When the ``required`` facet on a property is specified explicitly in a type declaration, any question mark in its property name is treated as part of the property name rather than as an indicator that the property is optional.
-
-For example, in
+在``required`` facet作用于某个类型声明中的某个属性时，任何对于属性名的问题标记都是针对属性名的一部分，而不是作为一个可选属性的指示器。
 
 [source,java]
 ----
@@ -490,7 +488,7 @@ types:
         required: true
 ----
 
-The ``profile`` type has a property named ``preference?`` that includes the trailing question mark. The following snippets show two ways of making ``preference?`` optional:
+``profile``类型具有一个叫做``preference?``的属性，它可以包含附加的问题标记。下列代码段展示了两种可选的使用``preference?``的方式：
 
 [source,java]
 ----
@@ -501,7 +499,7 @@ types:
         required: false
 ----
 
-or
+或
 
 [source,java]
 ----
@@ -511,13 +509,12 @@ types:
       preference??:
 ----
 
-Note:
+.注意：
+对象类型不包含"属性" facet时，那么此对象就会被认为是无约束的对象，它可以包含任何类型的任何属性。
 
-When an object type does not contain the "properties" facet, the object is assumed to be unconstrained and therefore capable of containing any properties of any type.
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#additional-properties[附加属性]
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#additional-properties[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Additional Properties
-
-By default, any instance of an object can have additional properties beyond those specified in its data type ``properties`` facet. Assume the following code is an instance of the data type ``Person`` that is described in the previous section.
+默认情况下，任何对象的实例都可以拥有附加的属性，而不仅仅是规范中的数据类型``properties`` facet。下面的代码展示了之前章节声明的数据类型``Person``的对象实例。
 
 [source,java]
 ----
@@ -527,9 +524,9 @@ Person:
   note: "US" # valid additional property `note`
 ----
 
-The property ``note`` is not explicitly declared in the ``Person`` data type, but is valid because all additional properties are valid by default.
+``note``属性没有明确在``Person``数据类型中声明，但它仍然有效，因为所有的附加类型都是默认生效的，而无论是否被显式声明。
 
-To restrict the addition of properties, you can set the value of the ``additionalProperties`` facet to ``false``, or you can specify regular expression patterns that match sets of keys and restrict their values. The latter are called "pattern properties". The patterns are delineated by pairs of opening and closing ``/`` characters, as follows:
+为了约束附加属性，你可以设置 ``additionalProperties`` facet的值为``false``，你也可以指定正则表达式patterns来匹配需要设置的键，并为它们添加约束。后文中我们会把它们统称为``pattern属性``。patterns是由成对的``/``字符来界定，就像下面这样：
 
 [source,java]
 ----
@@ -549,7 +546,7 @@ types:
         type: string
 ----
 
-This pattern property restricts any additional properties whose keys start with "note" followed by a string of one or more digits. Consequently, the example of an object instance that declares an additional ``note`` property with the value "US" is valid, but the same property is invalid with a non-string value:
+这一pattern属性可以为所有以"note"字符串开头的键添加附加属性约束。下面的示例中，``note``属性对于"US"是生效的，但对于同名的``note``属性则无效，因为它的值是一个数字类型而不是字符串类型。
 
 [source,java]
 ----
@@ -560,7 +557,7 @@ Person:
   address: "US" # valid as it does not match the pattern
 ----
 
-To force all additional properties to be strings, regardless of their keys, use:
+可以通过下列方式，强制所有被附加的属性都是字符串，而不管它们的键值是什么：
 
 [source,java]
 ----
