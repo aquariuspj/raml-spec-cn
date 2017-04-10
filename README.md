@@ -9,7 +9,7 @@ QQ：278400368
 
 
 
-##进度条
+## 进度条
 
 * Introduction
 * What's New and Different in RAML 1.0
