@@ -1137,3 +1137,187 @@ type: !include elements.xsd#Foo
 
 *   校验XML或者JSON实例的内部元素时，必须对XML或者JSON schema进行同样的校验。 
 *   对于XML实例结构的判断，可以引用XSD中的复杂类型，但如果复杂类型没有在顶级XML元素中定义一个名字，那么此类型无法用于序列化XML实例。
+
+=== 用户自定义Facets
+
+Facets为类型添加了各种附加的约束，例如数字类型numbers的``minimum``和``maximum``，scalars类型的``enum`` facet。除了RAML预建的facets之外，用户也可以根据需要，为各种类型自定义facets。
+
+用户自定义facet可以在类型声明中使用``facets``这一facet进行声明（很绕是吧，就是这么绕）。``facets``的值是一个map。map的键是自定义facet的名字。其中的值代表可用于此自定义facet中的值。自定义facet声明的语法和 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#property-declarations[属性声明]的语法是一样的。facet根据不同的值对类型的实例进行约束，而不约束类型本身。
+
+facet的名字不允许用左括号开始，从而与注解annotations进行区分。在类型type中，用户自定义的facet不能与类型的预建facets同名，也不允许与该类的继承树中的任何父类中的任何facet同名。
+
+若类型中的facet声明为必填项，那么任何type的子类都必须为此facet定义一个值。
+
+下列是一个示例，它为dates添加了约束，不允许dates是一个节假日：
+
+[source,java]
+----
+#%RAML 1.0
+title: API with Types
+types:
+  CustomDate:
+    type: date-only
+    facets:
+      onlyFutureDates?: boolean # 对于`PossibleMeetingDate`是可选的
+      noHolidays: boolean # 对于`PossibleMeetingDate`是必填项
+  PossibleMeetingDate:
+    type: CustomDate
+    noHolidays: true
+----
+
+在此示例中，我们声明了``noHolidays``，并为它定义了一个对日期实例的约束，描述日期能否是节假日。任何继承此类型（CustomDate）的子类都必须为它设置一个值，要么true，要么false，就像上例中的``PossibleMeetingDate``。
+
+用户自定义facets并不属于RAML规范的一部分，因此RAML处理器无需对它们进行标准化处理。RAML处理器可以选择处理或不处理用户自定义facets。在上面的例子中，RAML处理器无需赋予``noHolidays``任何含义，所以也不必纠结``PossibleMeetingDate``这一实例中的``noHolidays``的值到底是true还是false。
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#determine-default-types[鉴别默认类型]
+
+RAML处理器必须能够鉴别通过如下规则声明的类型的默认类型：
+
+*   当且仅当类型声明中包含了一个``properties``facet，那么它的默认类型就应该是``object``。下列示例展示了这一规则：
+
+[source,java]
+----
+types:
+  Person:
+    type: object
+    properties:
+----
+
+这一规则也可以用下面的格式：
+    
+[source,java]
+----
+types:
+  Person:
+    # 默认类型是`object`，无需显式定义
+    properties:
+----
+
+*   当且仅当类型声明既不包含``properties``facet，也不包含``type``或``schema``facet时，默认类型才是``string``。下列片段展示了这一规则：
+
+[source,java]
+----
+types:
+  Person:
+    properties:
+      name: # 无需指定type或schema，默认类型是`string`。
+----
+
+*   任何``body``节点如果不包含``properties``，``type``或``schema``，那么默认类型则是``any``。例如：
+
+[source,java]
+----
+body:
+  application/json:
+    # 默认类型是`any`
+----
+
+如果已经定义了默认媒体类型，那么就可以不再声明，就像下面这样：
+
+[source,java]
+----
+body:
+  # 默认类型是`any`
+----
+
+当然，所有规则都可以被明确的重写到类型定义中：
+
+[source,java]
+----
+types:
+  Person:
+    properties:
+      name:
+        type: number
+----
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-expressions[类型表达式Type Expressions]
+
+类型表达式提供了强大的方式来引用和定义类型。类型表达式可以被用于任何可以使用type的地方。最简单的类型表达式就是一个类型的名字。通过使用类型表达式，你可以设计类型组合、数组、maps以及其他一些有趣的玩意。
+
+|====
+| 表达式 | 说明
+| ``Person`` | 最简单的类型表达式：一个简单类
+| ``Person[]`` | 一个Person对象的数组
+| ``string[]`` | 一个scalars字符串的数组
+| ``string[][]`` | 一个scalars字符串的二维数组
+| ``string | Person`` | 一个联合类型，要么它是一个string，要么它是一个Person
+| ``(string | Person)[]`` | 上一个类型的数组
+|====
+
+类型表达式可以被用于任何能够使用类型的地方：
+
+[source,java]
+----
+#%RAML 1.0
+title: My API With Types
+
+types:
+  Phone:
+    type: object
+    properties:
+      manufacturer:
+        type: string
+      numberOfSIMCards:
+        type: number
+  Notebook:
+    type: object
+    properties:
+      manufacturer:
+        type: string
+      numberOfUSBPorts:
+        type: number
+  Person:
+    type: object
+    properties:
+      devices: ( Phone | Notebook )[]
+      reports: Person[]
+----
+
+你甚至可以从一个类型表达式进行继承：
+
+[source,java]
+----
+#%RAML 1.0
+title: My API With Types
+types:
+  Phone:
+    type: object
+    properties:
+      manufacturer:
+        type: string
+      numberOfSIMCards:
+        type: number
+  Notebook:
+    type: object
+    properties:
+      manufacturer:
+        type: string
+      numberOfUSBPorts:
+        type: number
+  Devices:
+    type:  ( Phone | Notebook )[]
+----
+
+这个例子声明了两个复杂类型：Phone和Notebook。也声明了一个Phone和Notebook联合到一起的一个组合类的数组类（没错，表述起来就是这么绕），并为这个数组类定义了一个别名（type alias）Devices。你可以通过这种办法为其他复杂类型添加一个简单的名字，也可以为其加上其他附加的属性，例如description或者annotations。
+
+==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#grammar[语法]
+
+类型表达式是预建类型或者自定义类型再结合某些符号的表达式，比如下面这些：
+
+
+|====
+| 表达式组合| 说明 | 例子
+| type name | 类型的名称，构建类型表达式的最基本的模块，它是一种最简单的类型表达式。 | ``number:``是一种预建类型
+
+``Person:``是一种自定义类型
+| (type expression) | 用括号来消除歧义。 | ``Person \| Animal[]``
+
+``( Person \| Animal )[]``
+| (type expression)[] | 通过在类型表达式后面加上一对方括号作为后缀来定义一维数组，说明这个类型是一个表达式所代表的类型的数组类。 | ``string[]:``是一个字符串数组
+
+``Person[][]:`` 是一个Person实例的二维数组。
+| (type expression 1) \| (type expression 2) | 通过竖线\|来连接两个类型表达式，表明它是一个联合类型（二选一）。联合操作符可以在一个表达式中被多次使用。 | 没有示例
+|====
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#multiple-inheritance[多继承Multiple Inheritance]
