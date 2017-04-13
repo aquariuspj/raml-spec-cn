@@ -46,7 +46,7 @@ QQ：278400368
 	* User-defined Facets [已完成]
 	* Determine Default Types [已完成]
 	* Type Expressions [已完成]
-	* Multiple Inheritance [准备开始...]
+	* Multiple Inheritance [正在翻译...]
 	* Inline Type Declarations
 	* Defining Examples in RAML
 		* Multiple Examples

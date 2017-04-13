@@ -1321,3 +1321,489 @@ types:
 |====
 
 === https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#multiple-inheritance[多继承Multiple Inheritance]
+
+RAML类型支持多继承。它是通过一个类型序列来实现的。
+
+[source,java]
+----
+types:
+  Person:
+    type: object
+    properties:
+      name: string
+  Employee:
+    type: object
+    properties:
+      employeeNr: integer
+  Teacher:
+    type: [ Person, Employee ]
+----
+
+上述例子中，``Teacher``同时继承了``Person``和``Employee``的约束。
+
+只有在子类继承所有父类的约束时仍然有效的情况下，多继承才会被允许。因此，它无法继承多个不同的（预建类型的）初始类型，例如``[ number, string ]``。
+
+下列示例中，子类``Number3``完全有效：
+
+[source,java]
+----
+types:
+  Number1:
+    type: number
+    minimum: 4
+  Number2:
+    type: number
+    maximum: 10
+  Number3: [ Number1, Number2]
+----
+
+在同样的示例中，如果把``Number2``的maximum值从10改成2，那么``Number3``则成为一个无效类型。
+
+[source,java]
+----
+types:
+  Number1:
+    type: number
+    minimum: 4
+  Number2:
+    type: number
+    maximum: 2
+  Number3: [ Number1, Number2] # 最大值不能小于最小值，因此此类型无效。
+----
+
+https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#union-multiple-inheritance[联合类型]这一小节中展示了如何用多继承和联合类型来进行校验的另一个示例。
+
+如果子类从至少两个父类中继承了同名的属性，那么有两种情况下子类会被认为是无效的：1) 当某个父类已经声明了"pattern" facet时，又定义了一个"pattern"。 2) 当另一个用户自定义facet具有相同的值时，又使用用户自定义的facet。这些情况下，我们认为这是一个无效类型声明。
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#inline-type-declarations[内联类型声明Inline Type Declarations]
+
+你可以在任何可以使用类型表达式的地方使用内联/匿名类型。
+
+[source,java]
+----
+#%RAML 1.0
+title: My API With Types
+/users/{id}:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            type: object
+            properties:
+              firstname:
+                type: string
+              lastname:
+                type: string
+              age:
+                type: number
+----
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-examples-in-raml[再RAML示例中定义一个示例]
+
+请务必接受我们的安利：请在你的API文档中包含一个具有代表性的示例。RAML支持定义多个示例，或者一个简单的任一的类型声明的实例。
+
+==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#multiple-examples[多个示例]
+
+**examples** facet是可选的，它能够用于为类型声明添加附带的例子。它的值是一个键值对表示的map，每个键值对都唯一标识某个 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#single-example[单一示例]。
+
+下列示例展示了**examples** facet的值：
+
+[source,java]
+----
+message: # {key} - unique id
+  # example declaration
+  title: Attention needed
+  body: You have been added to group 274
+record: # {key} - unique id
+  # example declaration
+  name: log item
+  comment: permission check
+----
+
+==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#single-example[单一示例]
+
+**example** facet是可选的，它能够用于给某个类型声明附加一个类型实例的示例。有两种方式进行附加：为类型实例指定一个明确的说明，或者在map中附带一些facets。
+
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#as-an-explicit-description-of-a-specific-type-instance[为类型实例指定一个明确的说明]
+
+例如：
+
+[source,java]
+----
+title: Attention needed
+body: You have been added to group 274
+----
+
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#as-a-map-that-contains-additional-facets[map中可以包含下列附带的facets]As a map that contains additional facets
+
+The map can contain the following additional facets:
+
+|====
+| Facet | 说明
+| displayName? | 对使用者友好的示例的名字。如果示例是examples节点的一部分，那么默认值则是示例中已经定义的用于唯一标识它的键值。
+| description? | 示例的详细描述。它的值是个字符串，也可以使用 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown]格式。
+| (<annotationName>)? | 用于此API的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#annotations[注解]。注解是通过圆括号"("和")"括起来的键值对，键表示注解的名字，值表示注解的实例。
+| value | 类型实例的真实示例。
+| strict? | 是否要用类型声明对此实例进行校验（默认为true）。设置为false说明不必校验。
+|====
+
+例子：
+
+[source,java]
+----
+(pii): true
+strict: false
+value:
+  title: Attention needed
+  body: You have been added to group 274
+----
+
+==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#example-of-how-to-define-exampleexamples-in-raml[在RAML中如何定义example/examples的示例]
+
+下列片段展示了example和examples属性如何在不同级别的RAML API中使用的示例：
+
+[source,java]
+----
+#%RAML 1.0
+title: API with Examples
+
+types:
+  User:
+    type: object
+    properties:
+      name: string
+      lastname: string
+    example:
+      name: Bob
+      lastname: Marley
+  Org:
+    type: object
+    properties:
+      name: string
+      address?: string
+      value?: string
+/organization:
+  post:
+    headers:
+      UserID:
+        description: the identifier for the user who posts a new organization
+        type: string
+        example: SWED-123 # single scalar example
+    body:
+      application/json:
+        type: Org
+        example: # single request body example
+          value: # needs to be declared since instance contains a 'value' property
+            name: Doe Enterprise
+            value: Silver
+  get:
+    description: Returns an organization entity.
+    responses:
+      201:
+        body:
+          application/json:
+            type: Org
+            examples:
+              acme:
+                name: Acme
+              softwareCorp:
+                value: # validate against the available facets for the map value of an example
+                  name: Software Corp
+                  address: 35 Central Street
+                  value: Gold # validate against an instance of the `value` property
+----
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#xml-serialization-of-type-instances[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]XML Serialization of Type Instances
+
+To facilitate the potentially complex process of serialization to XML, RAML introduces an additional ``xml`` node for https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-declarations[type declarations]. This node is used to configure how type instances should be serialized to XML. The value of the ``xml`` node is a map that contains the following nodes:
+
+|====
+| Name | Type | Description
+| attribute? | ``boolean`` | ``true`` serializes a type instance as an XML attribute. Can be ``true`` only for scalar types.  
+
+**Default:** ``false``
+| wrapped? | ``boolean`` | ``true`` wraps a type instance in its own XML element. Cannot be ``true`` for scalar types or ``true`` at the same moment ``attribute`` is ``true``.   
+
+**Default:** ``false``
+| name? | ``string`` | Overrides the name of the XML element or XML attribute.  
+
+**Default:** name of either a type or property
+| namespace? | ``string`` | Configures the name of the XML namespace.
+| prefix? | ``string`` | Configures the prefix used during serialization to XML.
+|====
+
+The following type declaration shows an example of using the ``xml`` node:
+
+[source,java]
+----
+types:
+  Person:
+    properties:
+      name:
+        type: string
+        xml:
+          attribute: true # serialize it as an XML attribute
+          name: "fullname" # attribute should be called fullname
+      addresses:
+        type: Address[]
+        xml:
+          wrapped: true # serialize it into its own ... XML element
+  Address:
+    properties:
+      street: string
+      city: string
+----
+
+The example above can be serialized into the following XML:
+
+[source,java]
+----
+<Person fullname="John Doe">
+  
+     …
+     ...
+  
+</Person>
+----
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#using-types-in-raml[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Using Types in RAML
+
+Types can be used in several positions:
+
+*   Body ( JSON )
+*   Body ( XML )
+*   Body ( Web Form )
+*   Headers
+*   Query Parameters
+*   URI Parameters
+Key points about serialization are:
+
+*   Serialization rules depend on the type and the position in which the type is used.
+*   A "string" is the default serialization target of a custom value type, which is an extended "value" of a built-in type.
+*   An extended built-in type inherits its serialization target.
+
+== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#resources-and-nested-resources[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Resources and Nested Resources
+
+A resource is identified by its relative URI, which MUST begin with a slash ("/"). Every node whose key begins with a slash, and is either at the root of the API definition or is the child node of a resource node, is such a resource node.
+
+A resource defined as a root-level node is called a top-level resource. The key of the root-level node is the URI of the resource relative to the baseUri if there is one. A resource defined as a child node of another resource is called a nested resource. The key of the child node is the URI of the nested resource relative to the parent resource URI.
+
+This example shows an API definition with one top-level resource, /gists, and one nested resource, /public.
+
+[source,java]
+----
+#%RAML 1.0
+title: GitHub API
+version: v3
+baseUri: https://api.github.com
+/gists:
+  displayName: Gists
+  /public:
+    displayName: Public Gists
+----
+
+The key of a resource node, its relative URI, MAY consist of multiple URI path fragments separated by slashes. For example, /bom/items might indicate the collection of items in a bill of materials as a single resource. However, if the individual URI path fragments are themselves resources, the API definition SHOULD use nested resources to describe this structure. For example, if /bom is itself a resource, then /items should be a nested resource of /bom, versus using /bom/items as a non-nested resource.
+
+Absolute URIs are not explicitly specified. They are computed by appending the relative URI of the top-level resource, and then successively appending the relative URI values for each nested resource until the target resource is reached. In this formation of the absolute URI, if a baseUri is defined, it is prepended before the relative URI of the top-level resource; any trailing slashes in the baseUri are removed before prepending.
+
+Continuing with the previous example, the absolute URI of the public gists resource is formed as follows.
+
+[source,java]
+----
+   "https://api.github.com"               <--- baseUri
+               +
+             "/gists"                     <--- gists resource relative URI
+               +
+             "/public"                    <--- public gists resource relative URI
+               =
+"https://api.github.com/gists/public"     <--- public gists absolute URI
+
+----
+
+A nested resource can itself have a child (nested) resource, creating a multiply-nested resource. In the following example, /user is a top-level resource that has no children; /users is a top-level resource that has a nested resource, /{userId}; and the nested resource, /{userId}, has three nested resources, /followers, /following, and /keys.
+
+[source,java]
+----
+#%RAML 1.0
+title: GitHub API
+version: v3
+baseUri: https://api.github.com
+/user:
+/users:
+  /{userId}:
+    uriParameters:
+      userId:
+        type: integer
+    /followers:
+    /following:
+    /keys:
+      /{keyId}:
+        uriParameters:
+          keyId:
+            type: integer
+----
+
+The computed absolute URIs for the resources, in the same order as their resource declarations, are as follows.
+
+[source,java]
+----
+https://api.github.com/user
+https://api.github.com/users
+https://api.github.com/users/{userId}
+https://api.github.com/users/{userId}/followers
+https://api.github.com/users/{userId}/following
+https://api.github.com/users/{userId}/keys
+https://api.github.com/users/{userId}/keys/{keyId}
+
+----
+
+A RAML processor MUST NOT allow one of the computed absolute URIs to be identical to another one; comparison of absolute URIs is done without consideration to the possible values of any URI parameter. Any URI parameter is not expanded or evaluated, but rather left as is.
+
+The following example shows effectively duplicated URIs, as both paths combine to the same ``/users/foo``. This would be forbidden.
+
+[source,java]
+----
+/users:
+  /foo:
+/users/foo:
+----
+
+The URIs in the following example would ALWAYS be ALLOWED.
+
+[source,java]
+----
+/users/{userId}:
+/users/{username}:
+/users/me:
+----
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#resource-property[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Resource Property
+
+The value of a resource node is a map whose key-value pairs are described in the following table.
+
+|====
+| Name | Description
+| displayName? | An alternate, human-friendly name for the resource. If the displayName node is not defined for a resource, documentation tools SHOULD refer to the resource by its key, which acts as the resource name. For example, tools should refer to the relative URI /jobs.
+| description? | A substantial, human-friendly description of a resource. Its value is a string and MAY be formatted using https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown].
+| (<annotationName>)? | https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#annotations[Annotations] to be applied to this API. An annotation is a map having a key that begins with "(" and ends with ")" where the text enclosed in parentheses is the annotation name, and the value is an instance of that annotation.
+| get?  
+patch?  
+put?  
+post?  
+delete?  
+options?  
+head? | The object describing the https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#methods[method].
+| is? | A list of https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-resource-types-and-traits[traits to apply] to all methods declared (implicitly or explicitly) for this resource. Individual methods can override this declaration.
+| type? | The https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-resource-types-and-traits[resource type] that this resource inherits.
+| securedBy? | The https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-security-schemes[security schemes] that apply to all methods declared (implicitly or explicitly) for this resource.
+| uriParameters? | Detailed information about any URI parameters of this resource.
+| /<relativeUri>? | A nested resource, which is identified as any node whose name begins with a slash ("/"), and is therefore treated as a relative URI.
+|====
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uris-and-uri-parameters[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Template URIs and URI Parameters
+
+https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[Template URIs] containing URI parameters can be used to define a relative URI of a resource that contains variable elements. The following example shows a top-level resource with a key /jobs and a nested resource with a key /{jobId}, a template URI.
+
+[source,java]
+----
+#%RAML 1.0
+title: ZEncoder API
+version: v2
+baseUri: https://app.zencoder.com/api/{version}
+/jobs: # its fully-resolved URI is https://app.zencoder.com/api/{version}/jobs
+  description: A collection of jobs
+  /{jobId}: # its fully-resolved URI is https://app.zencoder.com/api/{version}/jobs/{jobId}
+    description: A specific job, a member of the jobs collection
+----
+
+The OPTIONAL **uriParameters** node, shown in the next example, is used to explicitly specify URI parameters in a https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[Template URI]. The value of the uriParameters node is a map, specifically a https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#property-declarations[properties declaration], as is the value of the properties facet of a type declaration. Each property in the declaration object is a **URI parameter declaration**. Each property name corresponds to a parameter name in the https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[Template URI]. Each property value specifies the URI parameter type as a type name or an inline type declaration.
+
+Every property in a uriParameters declaration MUST correspond exactly to the name of a URI parameter in the relative URI of the resource. All URI parameters in the relative URI do not need to be explicitly specified in the uriParameters node, but those that are not specified MUST be treated as a URI parameter of type string and required.
+
+Like the https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#base-uri-and-base-uri-parameters[baseUriParameters root node], the version parameter is a reserved parameter name in the uriParameters properties declaration. The version parameter value corresponds to the value of the version root-level node.
+
+The following example shows two top-level resources, /user and /users, and a nested resource specified by its https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[Template URI], /{userId}. The URI parameter, userId, is explicitly declared and given a description and an integer type.
+
+[source,java]
+----
+#%RAML 1.0
+title: GitHub API
+version: v3
+baseUri: https://api.github.com
+/user:
+  description: The currently authenticated User
+/users:
+  description: All users
+  /{userId}:
+   description: A specific user
+   uriParameters:
+     userId:
+       description: The id of the user
+       type: integer
+----
+
+If a URI parameter declaration specifies an array, object, or union of non-scalar types, then processors MUST default to applying the JSON type to values of the URI parameter instances. The following example exaggerates the expected behavior:
+
+[source,java]
+----
+#%RAML 1.0
+title: Serialization API
+
+/users:
+  description: All users
+  /{userIds}:
+    description: A specific user
+    uriParameters:
+      userIds:
+        description: A list of userIds
+        type: array
+    	items:
+    	  type: string
+    	  minLength: 1
+    	uniqueItems: true
+----
+
+In this example, the URI parameter ``userIds`` is an array of ids. Assume the array should contain ``[blue,green]``, which on the wire might appear as ``/users/%5B%22blue%22,%22green%22%5D/``.
+
+If a URI parameter declaration specifies a non-string scalar type for the value of the header, the standard serialization rules for types MUST be invoked in applying the type to instances of that URI parameter.
+
+To avoid ambiguous matching, the values matched by URI parameters MUST NOT contain slash (/) characters. In the first example in this section, /jobs/123 is a URI (relative to the baseUri) that matches the /{jobId} resource nested within the /jobs resource, but the URI /jobs/123/x does not match any resource.
+
+In the next example, the top-level resource has URI parameters folderId and fileId.
+
+[source,java]
+----
+#%RAML 1.0
+title: Flat Filesystem API
+version: v1
+/files:
+  description: A collection of all files
+  /folder_{folderId}-file_{fileId}:
+    description: An item in the collection of all files
+----
+
+Although a URI parameter can be explicitly specified as optional, it SHOULD be required when surrounded directly by slashes ("/"). In this case, the URI parameter constitutes a complete URI path fragment, for example .../{objectId}/.... It usually makes no sense to allow a URI to contain adjacent slashes, enclosing no characters, for example ...//.... Hence, a URI parameter should be specified as optional only when it appears adjacent to other text. For example, /people/[line-through]#{fieldSelectors} indicates that URI parameter {fieldSelectors} can be blank, and therefore optional, implying that /people/# is a valid relative URI.
+
+A special URI reserved parameter, **ext**, might or might not be specified explicitly in a uriParameters node. Its meaning is reserved for use by a client to specify that the body of the request or response be of the associated media type.
+
+|====
+| URI Parameter | Value
+| ext | The desired media type of the request or response body
+|====
+
+By convention, a value for the ext parameter of .json is equivalent to an Accept header of application/json. A value of .xml is equivalent to an Accept header of text/xml. By employing the ext parameter, clients can specify the media type of a request or response through the URI rather than the Accept HTTP header. In the following example, the /users resource can be requested as application/json or text/xml:
+
+[source,java]
+----
+#%RAML 1.0
+title: API Using media type in the URL
+version: v1
+/users{ext}:
+  uriParameters:
+    ext:
+      enum: [ .json, .xml ]
+      description: Use .json to specify application/json or .xml to specify text/xml
+----
+
+== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#methods[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Methods
