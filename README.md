@@ -6,8 +6,10 @@ QQ：278400368
 兴趣群：4399664
 
 欢迎联系一起讨论，更欢迎一起翻译此文档！
+也欢迎关注我的翻译直播（不加班的每晚9点到12点）：
+http://live.bilibili.com/3946062
 
-
+觉得好的请给我点个赞，觉得不好也欢迎提出意见。
 
 ## 进度条
 
@@ -46,14 +48,14 @@ QQ：278400368
 	* User-defined Facets [已完成]
 	* Determine Default Types [已完成]
 	* Type Expressions [已完成]
-	* Multiple Inheritance [正在翻译...]
-	* Inline Type Declarations
-	* Defining Examples in RAML
+	* Multiple Inheritance [已完成]
+	* Inline Type Declarations[已完成]
+	* Defining Examples in RAML[已完成]
 		* Multiple Examples
 		* Single Example
 		* Example of how to define example/examples in RAML
-	* XML Serialization of Type Instances
-	* Using Types in RAML
+	* XML Serialization of Type Instances[已完成]
+	* Using Types in RAML[准备开始...]
 * Resources and Nested Resources
 	* Resource Property
 	* Template URIs and URI Parameters

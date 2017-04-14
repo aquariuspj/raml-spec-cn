@@ -1241,7 +1241,7 @@ types:
 | ``Person[]`` | 一个Person对象的数组
 | ``string[]`` | 一个scalars字符串的数组
 | ``string[][]`` | 一个scalars字符串的二维数组
-| ``string | Person`` | 一个联合类型，要么它是一个string，要么它是一个Person
+| ``string \| Person`` | 一个联合类型，要么它是一个string，要么它是一个Person
 | ``(string | Person)[]`` | 上一个类型的数组
 |====
 
@@ -1320,6 +1320,7 @@ types:
 | (type expression 1) \| (type expression 2) | 通过竖线\|来连接两个类型表达式，表明它是一个联合类型（二选一）。联合操作符可以在一个表达式中被多次使用。 | 没有示例
 |====
 
+
 === https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#multiple-inheritance[多继承Multiple Inheritance]
 
 RAML类型支持多继承。它是通过一个类型序列来实现的。
@@ -1373,6 +1374,7 @@ types:
 
 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#union-multiple-inheritance[联合类型]这一小节中展示了如何用多继承和联合类型来进行校验的另一个示例。
 
+
 如果子类从至少两个父类中继承了同名的属性，那么有两种情况下子类会被认为是无效的：1) 当某个父类已经声明了"pattern" facet时，又定义了一个"pattern"。 2) 当另一个用户自定义facet具有相同的值时，又使用用户自定义的facet。这些情况下，我们认为这是一个无效类型声明。
 
 === https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#inline-type-declarations[内联类型声明Inline Type Declarations]
@@ -1398,6 +1400,7 @@ title: My API With Types
               age:
                 type: number
 ----
+
 
 === https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#defining-examples-in-raml[再RAML示例中定义一个示例]
 
@@ -1435,9 +1438,9 @@ title: Attention needed
 body: You have been added to group 274
 ----
 
-===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#as-a-map-that-contains-additional-facets[map中可以包含下列附带的facets]As a map that contains additional facets
+===== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#as-a-map-that-contains-additional-facets[在map中附带一些facets]
 
-The map can contain the following additional facets:
+map中可以包含下列附带的facets：
 
 |====
 | Facet | 说明
@@ -1458,6 +1461,7 @@ value:
   title: Attention needed
   body: You have been added to group 274
 ----
+
 
 ==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#example-of-how-to-define-exampleexamples-in-raml[在RAML中如何定义example/examples的示例]
 
@@ -1514,26 +1518,27 @@ types:
                   value: Gold # validate against an instance of the `value` property
 ----
 
-=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#xml-serialization-of-type-instances[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]XML Serialization of Type Instances
 
-To facilitate the potentially complex process of serialization to XML, RAML introduces an additional ``xml`` node for https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-declarations[type declarations]. This node is used to configure how type instances should be serialized to XML. The value of the ``xml`` node is a map that contains the following nodes:
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#xml-serialization-of-type-instances[类型实例的XML序列化]
+
+RAML通过在 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#type-declarations[类型声明]中附加``xml``节点来简化XML序列化这一过程的复杂性。此节点用于配置类型实例应该如何被序列化为XML。``xml``节点的值是一个包含下列节点的map：
 
 |====
-| Name | Type | Description
-| attribute? | ``boolean`` | ``true`` serializes a type instance as an XML attribute. Can be ``true`` only for scalar types.  
+| Name | Type | 说明
+| attribute? | ``boolean`` | ``true``将此类型实例序列化为一个XML属性，只允许scalar类型，可以是``true``。
 
-**Default:** ``false``
-| wrapped? | ``boolean`` | ``true`` wraps a type instance in its own XML element. Cannot be ``true`` for scalar types or ``true`` at the same moment ``attribute`` is ``true``.   
+**默认值：** ``false``
+| wrapped? | ``boolean`` | ``true``表示将此类型实例封装为一个XML元素。可以是scalar类型的``true``，和``attribute``中的``true``类似。
 
-**Default:** ``false``
-| name? | ``string`` | Overrides the name of the XML element or XML attribute.  
+**默认值：** ``false``
+| name? | ``string`` | 更改序列化出来的XML元素或属性名。
 
-**Default:** name of either a type or property
-| namespace? | ``string`` | Configures the name of the XML namespace.
-| prefix? | ``string`` | Configures the prefix used during serialization to XML.
+**默认值：** 类型或属性的名字。
+| namespace? | ``string`` | 配置XML命名空间的名字。
+| prefix? | ``string`` | 配置用于序列化为XML的前缀。
 |====
 
-The following type declaration shows an example of using the ``xml`` node:
+下列类型声明展示了``xml``节点的使用：
 
 [source,java]
 ----
@@ -1555,7 +1560,7 @@ types:
       city: string
 ----
 
-The example above can be serialized into the following XML:
+上述示例可以序列化为下面的XML：
 
 [source,java]
 ----
@@ -1567,7 +1572,7 @@ The example above can be serialized into the following XML:
 </Person>
 ----
 
-=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#using-types-in-raml[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Using Types in RAML
+=== Using Types in RAML
 
 Types can be used in several positions:
 
@@ -1805,5 +1810,3 @@ version: v1
       enum: [ .json, .xml ]
       description: Use .json to specify application/json or .xml to specify text/xml
 ----
-
-== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#methods[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Methods
