@@ -1,4 +1,11 @@
 = RAML规范
+:doctype: book
+:encoding: utf-8
+:lang: zh-cn
+:toc: left
+:toclevels: 3
+:icons:
+:numbered:
 
 RAML全称是RESTful API Modeling Language（RESTful API建模语言），由MuleSoft公司成员主导设计。
 
@@ -1571,30 +1578,42 @@ types:
   
 </Person>
 ----
+The example above can be serialized into the following XML:
 
-=== Using Types in RAML
+[source,java]
+----
+<Person fullname="John Doe">
+  
+     …
+     ...
+  
+</Person>
+----
 
-Types can be used in several positions:
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#using-types-in-raml[在RAML中使用类型]
+
+类型可以用于如下几个位置：
 
 *   Body ( JSON )
 *   Body ( XML )
 *   Body ( Web Form )
 *   Headers
-*   Query Parameters
-*   URI Parameters
-Key points about serialization are:
+*   查询参数
+*   URI参数
 
-*   Serialization rules depend on the type and the position in which the type is used.
-*   A "string" is the default serialization target of a custom value type, which is an extended "value" of a built-in type.
-*   An extended built-in type inherits its serialization target.
+序列化的关键点在于：
 
-== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#resources-and-nested-resources[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Resources and Nested Resources
+*   序列化规则依赖于在类型中使用的类型的位置。
+*   自定义值类型的默认序列化目标是字符串"string"，它的预建类型的扩展值"value"。
+*   被扩展的预建类型会继承它的序列化目标。
 
-A resource is identified by its relative URI, which MUST begin with a slash ("/"). Every node whose key begins with a slash, and is either at the root of the API definition or is the child node of a resource node, is such a resource node.
+== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#resources-and-nested-resources[资源与嵌套资源]
 
-A resource defined as a root-level node is called a top-level resource. The key of the root-level node is the URI of the resource relative to the baseUri if there is one. A resource defined as a child node of another resource is called a nested resource. The key of the child node is the URI of the nested resource relative to the parent resource URI.
+资源通过相对URI进行标识，它必须以反斜杠("/")开始。每个以反斜杠开始的节点，如果同时处于API定义的根节点或者资源节点的子节点，那么它就是一个资源节点。
 
-This example shows an API definition with one top-level resource, /gists, and one nested resource, /public.
+资源如果定义在root级别，那么称之为顶层资源。如果具有baseUri，那么root级别的节点的键就是资源相对于baseUri的URI。资源如果作为一个子节点定义在其他资源内部，那么我们称之为嵌套资源。子节点的键值则是资源相对于父资源URI的URI。
+
+下列示例展示了一个root级资源/gists和一个嵌套资源/public。
 
 [source,java]
 ----
@@ -1608,11 +1627,11 @@ baseUri: https://api.github.com
     displayName: Public Gists
 ----
 
-The key of a resource node, its relative URI, MAY consist of multiple URI path fragments separated by slashes. For example, /bom/items might indicate the collection of items in a bill of materials as a single resource. However, if the individual URI path fragments are themselves resources, the API definition SHOULD use nested resources to describe this structure. For example, if /bom is itself a resource, then /items should be a nested resource of /bom, versus using /bom/items as a non-nested resource.
+资源节点的键值，即相对URI，可以由多个以反斜杠分割的URI路径片段组成。例如，/bom/items可以表明一份材料清单中的元素组合作为一个单一资源。但是，如果个别URI路径片段具有各自的资源，那么API应该使用嵌套资源来描述这样的结构。例如，如果/bom自己就是一个资源，那么/items应该作为/bom的一个嵌套资源，而不是使用/bom/items这样一个非嵌套资源。
 
-Absolute URIs are not explicitly specified. They are computed by appending the relative URI of the top-level resource, and then successively appending the relative URI values for each nested resource until the target resource is reached. In this formation of the absolute URI, if a baseUri is defined, it is prepended before the relative URI of the top-level resource; any trailing slashes in the baseUri are removed before prepending.
+绝对URIs无须明确指定。他们计算附加的顶级资源的相对URI，然后添加每个嵌套资源的相对URI直到到达目标资源。在生成绝对URI时，如果定义了baseUri，那么就将其附加到顶级资源的相对URI之前，任何在baseUri之后的反斜杠都会被移除。
 
-Continuing with the previous example, the absolute URI of the public gists resource is formed as follows.
+紧接着上面的例子，public gists资源的绝对URI就像下面的格式：
 
 [source,java]
 ----
@@ -1626,7 +1645,7 @@ Continuing with the previous example, the absolute URI of the public gists resou
 
 ----
 
-A nested resource can itself have a child (nested) resource, creating a multiply-nested resource. In the following example, /user is a top-level resource that has no children; /users is a top-level resource that has a nested resource, /{userId}; and the nested resource, /{userId}, has three nested resources, /followers, /following, and /keys.
+嵌套资源自身也可以拥有子（嵌套）资源，也可以创建多个嵌套资源。在下面的例子中，/user就是一个没有孩子的顶级资源；/users是具有嵌套资源/{userid}的顶级资源；嵌套资源/{userid}也具有三个嵌套资源，分别是/followers、/following和/keys。
 
 [source,java]
 ----
@@ -1649,7 +1668,7 @@ baseUri: https://api.github.com
             type: integer
 ----
 
-The computed absolute URIs for the resources, in the same order as their resource declarations, are as follows.
+为资源计算绝对URIs，与他们的资源声明顺序相同，就像下面这样：
 
 [source,java]
 ----
@@ -1663,9 +1682,9 @@ https://api.github.com/users/{userId}/keys/{keyId}
 
 ----
 
-A RAML processor MUST NOT allow one of the computed absolute URIs to be identical to another one; comparison of absolute URIs is done without consideration to the possible values of any URI parameter. Any URI parameter is not expanded or evaluated, but rather left as is.
+RAML处理器必须禁止某个被计算的绝对URI与另一个完全相同；绝对URIs的对比不能通过任何URI参数的可能的值。任何URI参数都不会被扩展或计算，而是被保留。
 
-The following example shows effectively duplicated URIs, as both paths combine to the same ``/users/foo``. This would be forbidden.
+下面的例子展示了多个有效的URIs表达式，二者都指向了同样的``/users/foo``。这是不允许的。
 
 [source,java]
 ----
@@ -1674,7 +1693,7 @@ The following example shows effectively duplicated URIs, as both paths combine t
 /users/foo:
 ----
 
-The URIs in the following example would ALWAYS be ALLOWED.
+但是像下面这样的URIs是允许的：
 
 [source,java]
 ----
@@ -1683,32 +1702,38 @@ The URIs in the following example would ALWAYS be ALLOWED.
 /users/me:
 ----
 
-=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#resource-property[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Resource Property
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#resource-property[资源属性]
 
-The value of a resource node is a map whose key-value pairs are described in the following table.
+资源节点的值是一个map，键值对可以是下表：
 
 |====
 | Name | Description
-| displayName? | An alternate, human-friendly name for the resource. If the displayName node is not defined for a resource, documentation tools SHOULD refer to the resource by its key, which acts as the resource name. For example, tools should refer to the relative URI /jobs.
-| description? | A substantial, human-friendly description of a resource. Its value is a string and MAY be formatted using https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown].
-| (<annotationName>)? | https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#annotations[Annotations] to be applied to this API. An annotation is a map having a key that begins with "(" and ends with ")" where the text enclosed in parentheses is the annotation name, and the value is an instance of that annotation.
+| displayName? | 对阅读者友好的资源名。如果displayName节点没有在资源中定义，那么文档工具可以通过资源的键值来引用它，正如资源的名字一样。比如资源应该引用相对URI/jobs。
+| description? | 详细的资源描述。它的值可以是一个字符串，也可以是 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown]格式。
+| (<annotationName>)? | https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#annotations[注解]也可以在此API中使用。注解是一个map，它的键必须用圆括号括起，它的值是一个注解的实例。
 | get?  
-patch?  
-put?  
-post?  
-delete?  
-options?  
-head? | The object describing the https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#methods[method].
-| is? | A list of https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-resource-types-and-traits[traits to apply] to all methods declared (implicitly or explicitly) for this resource. Individual methods can override this declaration.
-| type? | The https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-resource-types-and-traits[resource type] that this resource inherits.
-| securedBy? | The https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-security-schemes[security schemes] that apply to all methods declared (implicitly or explicitly) for this resource.
-| uriParameters? | Detailed information about any URI parameters of this resource.
-| /<relativeUri>? | A nested resource, which is identified as any node whose name begins with a slash ("/"), and is therefore treated as a relative URI.
+
+patch?
+
+put?
+
+post?
+
+delete?
+
+options?
+
+head? | 参见 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#methods[method].
+| is? | 可以用于资源所有方法声明（显式或隐式）的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-resource-types-and-traits[特性]。个别方法可以重写这一声明。
+| type? | 资源继承的https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-resource-types-and-traits[资源类型]。
+| securedBy? | 资源中的所有方法声明（显式或隐式）所使用的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-security-schemes[安全schemes]。
+| uriParameters? | 关于此资源的任何URI参数的详细信息。
+| /<relativeUri>? | 嵌套资源，它由任一以反斜杠("/")开始的节点来标识，因此作为相对URI来使用。
 |====
 
-=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uris-and-uri-parameters[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Template URIs and URI Parameters
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uris-and-uri-parameters[模板URIs与URI参数]
 
-https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[Template URIs] containing URI parameters can be used to define a relative URI of a resource that contains variable elements. The following example shows a top-level resource with a key /jobs and a nested resource with a key /{jobId}, a template URI.
+https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[模板URIs]包含了URI参数。在资源中定义相对URI时，可以使用变量元素。下列示例展示了一个顶层资源/jobs和一个嵌套资源/{jobId}，这是一个模板URI。
 
 [source,java]
 ----
@@ -1722,11 +1747,13 @@ baseUri: https://app.zencoder.com/api/{version}
     description: A specific job, a member of the jobs collection
 ----
 
-The OPTIONAL **uriParameters** node, shown in the next example, is used to explicitly specify URI parameters in a https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[Template URI]. The value of the uriParameters node is a map, specifically a https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#property-declarations[properties declaration], as is the value of the properties facet of a type declaration. Each property in the declaration object is a **URI parameter declaration**. Each property name corresponds to a parameter name in the https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[Template URI]. Each property value specifies the URI parameter type as a type name or an inline type declaration.
+**uriParameters**节点是可选项，能够用于在 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[模板URI]中明确指定URI的参数，它将在下一个示例中展示。uriParameters节点的值是一个map，指定了一个 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#property-declarations[属性声明]，它是类型声明的属性facet的值。声明的对象的每个属性都是一个**URI参数声明**。每个属性名都与 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[模板URI]的参数名对应。每个属性值都指定URI参数类型URI参数类型作为一个类型名或者内联的类型声明。
 
-Every property in a uriParameters declaration MUST correspond exactly to the name of a URI parameter in the relative URI of the resource. All URI parameters in the relative URI do not need to be explicitly specified in the uriParameters node, but those that are not specified MUST be treated as a URI parameter of type string and required.
+每个uriParameters声明中的属性都必须精确对应资源的相对URI中的URI参数名。相对URI中的全部URI参数都不需要明确在uriParameters节点中指定，但是那些未指定的URI必须作为必填的类型字符串的URI参数来处理。
 
-Like the https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#base-uri-and-base-uri-parameters[baseUriParameters root node], the version parameter is a reserved parameter name in the uriParameters properties declaration. The version parameter value corresponds to the value of the version root-level node.
+正如https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#base-uri-and-base-uri-parameters[baseUriParameters根节点]，在uriParameters属性声明中，version参数是保留参数名。version参数值与version顶级节点的值对应。
+
+下列示例展示了两个顶层资源，/user和/users，与一个通过 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[模板URI]来定义的嵌套资源，/userId。URI参数，
 
 The following example shows two top-level resources, /user and /users, and a nested resource specified by its https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[Template URI], /{userId}. The URI parameter, userId, is explicitly declared and given a description and an integer type.
 

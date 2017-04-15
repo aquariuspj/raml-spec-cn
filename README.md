@@ -22,7 +22,7 @@ http://live.bilibili.com/3946062
 	* Protocols
 	* Default Media Types
 	* Default Security
-* RAML Data Types
+* RAML Data Types[已完成]
 	* Introduction [已完成]
 	* Overview [已完成]
 	* Defining Types [已完成]
@@ -55,10 +55,10 @@ http://live.bilibili.com/3946062
 		* Single Example
 		* Example of how to define example/examples in RAML
 	* XML Serialization of Type Instances[已完成]
-	* Using Types in RAML[准备开始...]
+	* Using Types in RAML[已完成]
 * Resources and Nested Resources
-	* Resource Property
-	* Template URIs and URI Parameters
+	* Resource Property[已完成]
+	* Template URIs and URI Parameters[正在翻译...]
 * Methods
 	* Headers
 	* Query Strings and Query Parameters
