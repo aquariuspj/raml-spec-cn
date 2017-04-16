@@ -1753,9 +1753,7 @@ baseUri: https://app.zencoder.com/api/{version}
 
 正如https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#base-uri-and-base-uri-parameters[baseUriParameters根节点]，在uriParameters属性声明中，version参数是保留参数名。version参数值与version顶级节点的值对应。
 
-下列示例展示了两个顶层资源，/user和/users，与一个通过 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[模板URI]来定义的嵌套资源，/userId。URI参数，
-
-The following example shows two top-level resources, /user and /users, and a nested resource specified by its https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[Template URI], /{userId}. The URI parameter, userId, is explicitly declared and given a description and an integer type.
+下列示例展示了两个顶层资源，/user和/users，以及一个通过 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#template-uri[模板URI]来定义的嵌套资源/userId。URI参数 userId被明确声明，并且给了它一个description还有一个整数类型integer type。
 
 [source,java]
 ----
@@ -1775,7 +1773,7 @@ baseUri: https://api.github.com
        type: integer
 ----
 
-If a URI parameter declaration specifies an array, object, or union of non-scalar types, then processors MUST default to applying the JSON type to values of the URI parameter instances. The following example exaggerates the expected behavior:
+如果URI参数声明指定了数组、对象或者非scalar类型的联合类型，那么处理器必须为URI参数实例的值使用默认的JSON类型。下列示例扩展了预期行为：
 
 [source,java]
 ----
@@ -1796,13 +1794,13 @@ title: Serialization API
     	uniqueItems: true
 ----
 
-In this example, the URI parameter ``userIds`` is an array of ids. Assume the array should contain ``[blue,green]``, which on the wire might appear as ``/users/%5B%22blue%22,%22green%22%5D/``.
+在这个示例中，URI参数``userIds``是一个ids的数组。假设数组应该包含``[blue,green]``，那么在线上可能会像这样显示``/users/%5B%22blue%22,%22green%22%5D/``。
 
-If a URI parameter declaration specifies a non-string scalar type for the value of the header, the standard serialization rules for types MUST be invoked in applying the type to instances of that URI parameter.
+如果URI参数声明为header的值指定了一个非字符串的scalar类型，那么对于类型的标准序列化规则必须在将类型应用到URI参数的实例时被调用。
 
-To avoid ambiguous matching, the values matched by URI parameters MUST NOT contain slash (/) characters. In the first example in this section, /jobs/123 is a URI (relative to the baseUri) that matches the /{jobId} resource nested within the /jobs resource, but the URI /jobs/123/x does not match any resource.
+为了避免模糊匹配，URI参数匹配的值不能包含反斜杠字符。本小节中的第一个例子中，/jobs/123是一个能够匹配嵌套在/job资源中的/{jobId}资源的URI（相对于baseUri），但/jobs/123/x无法匹配任何资源。
 
-In the next example, the top-level resource has URI parameters folderId and fileId.
+在下一个例子中，顶级资源具有folderId和fileId两个URI参数。
 
 [source,java]
 ----
@@ -1815,16 +1813,16 @@ version: v1
     description: An item in the collection of all files
 ----
 
-Although a URI parameter can be explicitly specified as optional, it SHOULD be required when surrounded directly by slashes ("/"). In this case, the URI parameter constitutes a complete URI path fragment, for example .../{objectId}/.... It usually makes no sense to allow a URI to contain adjacent slashes, enclosing no characters, for example ...//.... Hence, a URI parameter should be specified as optional only when it appears adjacent to other text. For example, /people/[line-through]#{fieldSelectors} indicates that URI parameter {fieldSelectors} can be blank, and therefore optional, implying that /people/# is a valid relative URI.
+尽管URI参数可以明确指定为非必须参数，但它也应该被反斜杠("/")直接包围。在这个例子中，URI参数组成了完成的URI路径片段，例如.../{objectId}/...。让URI包含两个连续的反斜杠（比如...//...）通常毫无意义。因此，只有当URI参数连接了其他文本，它才应该被指定为可选项。例如，/people/[line-through]#{fieldSelectors}说明了URI参数{fieldSelectors}可以为空（可选项），它也说明了/people/#是一个有效的相对URI。
 
-A special URI reserved parameter, **ext**, might or might not be specified explicitly in a uriParameters node. Its meaning is reserved for use by a client to specify that the body of the request or response be of the associated media type.
+还有一个特殊的URI保留参数**ext**，它在uriParameters节点中也是可选的。保留它是为了能够通过客户端指定请求或响应的报问体中的相关媒体类型。
 
 |====
-| URI Parameter | Value
-| ext | The desired media type of the request or response body
+| URI Parameter | 值
+| ext | 描述请求或响应报文体的媒体类型。
 |====
 
-By convention, a value for the ext parameter of .json is equivalent to an Accept header of application/json. A value of .xml is equivalent to an Accept header of text/xml. By employing the ext parameter, clients can specify the media type of a request or response through the URI rather than the Accept HTTP header. In the following example, the /users resource can be requested as application/json or text/xml:
+依照惯例，ext参数的.json值等价于application/json的Accept头。.xml的值等价于text/xml的Accept头。通过使用ext参数，客户端可以通过URI而不是Accept HTTP头来指定请求或响应的媒体类型。再下面的例子中，/users资源可以通过/application/json或者text/xml来请求。
 
 [source,java]
 ----
@@ -1836,4 +1834,181 @@ version: v1
     ext:
       enum: [ .json, .xml ]
       description: Use .json to specify application/json or .xml to specify text/xml
+----
+
+== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#methods[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Methods
+
+RESTful API methods are operations that are performed on a resource. The OPTIONAL properties **get**, **patch**, **put**, **post**, **delete**, **head**, and **options** of a resource define its methods; these correspond to the HTTP methods defined in the HTTP version 1.1 specification https://www.ietf.org/rfc/rfc2616.txt[RFC2616] and its extension, https://tools.ietf.org/html/rfc5789[RFC5789]. The value of these method properties is a map that has the following key-value pairs:
+
+|====
+| Name | Description
+| displayName? | An alternate, human-friendly method name in the context of the resource. If the displayName node is not defined for a method, documentation tools SHOULD refer to the resource by its key, which acts as the method name.
+| description? | A longer, human-friendly description of the method in the context of the resource. Its value is a string and MAY be formatted using https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown].
+| (<annotationName>)? | https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#annotations[Annotations] to be applied to this API. An annotation is a map having a key that begins with "(" and ends with ")" where the text enclosed in parentheses is the annotation name, and the value is an instance of that annotation.
+| queryParameters? | Detailed information about any query parameters needed by this method. Mutually exclusive with queryString.
+| headers? | Detailed information about any request headers needed by this method.
+| queryString? | The query string needed by this method. Mutually exclusive with queryParameters.
+| responses? | Information about the expected responses to a request.
+| body? | A request body that the method admits.
+| protocols? | Explicitly specify the protocol(s) used to invoke a method, thereby overriding the protocols set elsewhere, for example in the baseUri or the https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#protocols[root-level protocols] node.
+| is? | A list of the https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-resource-types-and-traits[traits] to apply to this method.
+| securedBy? | The https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-security-schemes[security schemes] that apply to this method.
+|====
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#headers[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Headers
+
+An API's methods can support or require various HTTP headers. The OPTIONAL **headers** node is used to explicitly specify those headers. The value of the headers node is a map, specifically a https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#property-declarations[properties declaration], as is the value of the properties object of a type declaration. Each property in this declaration object is a header **declaration**. Each property name specifies an allowed header name. Each property value specifies the header value type as a type name or an inline type declaration.
+
+The following simple example shows a post method with a single HTTP header named Zencoder-Api-Key of (implied) string type.
+
+[source,java]
+----
+#%RAML 1.0
+title: ZEncoder API
+version: v2
+baseUri: https://app.zencoder.com/api/{version}
+/jobs:
+  post:
+    description: Create a job
+    headers:
+      Zencoder-Api-Key:
+        description: The API key needed to create a new job
+----
+
+If a header declaration specifies an array type for the value of the header, processors MUST allow multiple instances of that header in the request or response. In this case, the type of the array elements MUST be applied as the type of the value of header instances.
+
+If a header declaration specifies a non-array type for the value of the header, or doesn't specify a type (equivalent to specifying a string type), processors MUST disallow multiple instances of that header in the request or response.
+
+RAML does not define validation when a header declaration specifies any of the following types for the value of the header: an object type, a union of non-scalar types, or an array type if the underlying type of the array is an object type, array type, or a union of non-scalar types. Processors MAY default to treating the format of the header value as JSON in applying the type to instances of that header, or they MAY allow other treatments based on annotations.
+
+Some headers can also be added by the intermediate client- and server-side systems, such as a browser or a proxy.
+
+The following example illustrates inheriting headers from a trait, allowing multiple instances of a header, specifying examples, and overriding the headers when applied to a method and a resource.
+
+[source,java]
+----
+#%RAML 1.0
+title: Example with headers
+traits:
+  chargeable:
+    headers:
+      X-Dept:
+        type: array
+        description: |
+          A department code to be charged.
+          Multiple of such headers are allowed.
+        items:
+          pattern: ^\d+\-\w+$
+          example: 230-OCTO
+  traceable:
+    headers:
+      X-Tracker:
+        description: A code to track API calls end to end
+        pattern: ^\w{16}$
+        example: abcdefghijklmnop
+/users:
+  get:
+    is: [ chargeable, traceable ]
+    description: |
+      The HTTP interaction will look like
+
+      GET /users HTTP/1.1
+      X-Dept: 18-FINANCE
+      X-Dept: 200-MISC
+      X-Tracker: gfr456d03ygh38s2
+    headers:
+      X-Dept:
+        example: [ 18-FINANCE, 200-MISC ]
+      X-Tracker:
+        example: gfr456d03ygh38s2
+----
+
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#query-strings-and-query-parameters[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Query Strings and Query Parameters
+
+An API method can support or require a query string in the URL on which the method is invoked. The query string in a URL is defined in https://www.ietf.org/rfc/rfc3986.txt[RFC3986] as the part of the URL following the question mark separator ("?") and preceding any fragment ("#") separator. The query string can be specified either by the OPTIONAL **queryString** node or by the OPTIONAL **queryParameters** node. The queryString and queryParameters nodes are mutually exclusive: processors MUST NOT allow both to be specified, explicitly or implicitly, on the same method of the same resource.
+
+==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#the-query-string-as-a-whole[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]The Query String as a Whole
+
+The **queryString** node is used to specify the query string as a whole, rather than as name-value pairs. The queryString value is either the name of a data type or an inline data type declaration, including a data type expression. In either case, all base types in type hierarchy of the data type MUST be either a scalar type or the object type, after fully expanding any union type expressions at every level of the type hierarchy.
+
+If the type is derived from a scalar type, the query string as a whole MUST be described by the type.
+
+If the type is derived from an object type, processors MUST regard the query string as a URL-encoded serialization of an instance of this object type. The query string must be of the form "parameter1=value1&parameter2=value2&...", where "parameter1", "parameter2", and so on correspond to properties in the object type. Likewise, "value1", "value2", and so on correspond to value specifications in the object type. If a value of a property in the object type is an array type, processors MUST allow multiple instances of that query parameter in the query string. In such a case, the type of the elements of the array MUST be applied as the type of the value of instances of this query parameter.
+
+In the following example, union types and extended multiple types are used to constrain the query parameters to specific alternatives:
+
+[source,java]
+----
+#%RAML 1.0
+title: Illustrate query parameter variations
+types:
+  lat-long: # lat & long required; mutually exclusive with location
+    properties:
+      lat: number
+      long: number
+  loc: # location required; mutually exclusive with lat & long
+    properties:
+      location:
+  paging: # each is optional, not exclusive with anything
+    properties:
+      start?: number
+      page-size?: number
+/locations:
+  get:
+    queryString:
+      type: [paging,  lat-long | loc ]
+      examples:
+        first:
+          value:
+            start: 2
+            lat: 12
+            long: 13
+        second:
+          value:
+            start: 2
+            page-size: 20
+            location: 1,2
+        third:  # not valid
+          value:
+            lat: 12
+            location: 2
+          strict: false # because it's not valid
+----
+
+==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#query-parameters-in-a-query-string[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Query Parameters in a Query String
+
+The **queryParameters** node specifies the set of query parameters from which the query string is composed. When applying the restrictions defined by the API, processors MUST regard the query string as a set of query parameters according to the URL encoding format. The value of the queryParameters node is a https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#property-declarations[properties declaration] object, as is the value of the properties object of a type declaration. Each property in this declaration object is referred to as a **query parameter declaration**. Each property name specifies an allowed query parameter name. Each property value specifies the query parameter value type as the name of a type or an inline type declaration.
+
+If a query parameter declaration specifies an array type for the value of the query parameter, processors MUST allow multiple instances of that query parameter in the request or response. In this case, the type of the elements of the array MUST be applied as the type of the value of query parameter instances.
+
+If a query parameter declaration specifies a non-array type for the value of the query parameter, or doesn't specify a type (equivalent to specifying a string type), processors MUST disallow multiple instances of that query parameter in the request.
+
+RAML does not define validation when a query parameter declaration specifies any of the following types for the value of the query parameter: an object type, a union of non-scalar types, or an array type if the underlying type of the array is an object type or union of non-scalar types. Processors MAY default to treating the format of the query parameter value as JSON in applying the type to instances of that query parameter, or they MAY allow other treatments based on annotations.
+
+The standard serialization rules for types MUST be invoked in applying the type to instances of a query parameter if the query parameter definition specifies the value of the query parameter as any of the following types: a non-string scalar type, a union of non-string scalar types, or an array type if the underlying type of the array is a non-string scalar type or union of non-string scalar types.
+
+The following example shows a get method that uses HTTP query parameters. Using example values sends a request to https://api.github.com/v3/users?page=1&per_page=50[https://api.github.com/v3/users?page=1&per_page=50].
+
+[source,java]
+----
+#%RAML 1.0
+title: GitHub API
+version: v3
+baseUri: https://api.github.com/{version}
+/users:
+  get:
+    description: Get a list of users
+    queryParameters:
+      page:
+        description: Specify the page that you want to retrieve
+        type:        integer
+        required:    true
+        example:     1
+      per_page:
+        description: Specify the amount of items that will be retrieved per page
+        type:        integer
+        minimum:     10
+        maximum:     200
+        default:     30
+        example:     50
 ----

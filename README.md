@@ -58,7 +58,7 @@ http://live.bilibili.com/3946062
 	* Using Types in RAML[已完成]
 * Resources and Nested Resources
 	* Resource Property[已完成]
-	* Template URIs and URI Parameters[正在翻译...]
+	* Template URIs and URI Parameters[已完成]
 * Methods
 	* Headers
 	* Query Strings and Query Parameters
