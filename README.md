@@ -56,10 +56,10 @@ http://live.bilibili.com/3946062
 		* Example of how to define example/examples in RAML
 	* XML Serialization of Type Instances[已完成]
 	* Using Types in RAML[已完成]
-* Resources and Nested Resources
+* Resources and Nested Resources[已完成]
 	* Resource Property[已完成]
 	* Template URIs and URI Parameters[已完成]
-* Methods
+* Methods[准备开始...]
 	* Headers
 	* Query Strings and Query Parameters
 		* The Query String as a Whole
