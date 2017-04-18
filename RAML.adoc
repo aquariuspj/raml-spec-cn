@@ -1838,24 +1838,24 @@ version: v1
 
 == https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#methods[方法Methods]
 
-RESTful API methods are operations that are performed on a resource. The OPTIONAL properties **get**, **patch**, **put**, **post**, **delete**, **head**, and **options** of a resource define its methods; these correspond to the HTTP methods defined in the HTTP version 1.1 specification https://www.ietf.org/rfc/rfc2616.txt[RFC2616] and its extension, https://tools.ietf.org/html/rfc5789[RFC5789]. The value of these method properties is a map that has the following key-value pairs:
+RESTful API方法对于每个URI资源都是可选的。资源的**get**, **patch**, **put**, **post**, **delete**, **head**, 和**options**定义了各自的方法；它们与HTTP 1.1版本里定义的HTTP方法很相似，HTTP 1.1在 https://www.ietf.org/rfc/rfc2616.txt[RFC2616]规范及其扩展https://tools.ietf.org/html/rfc5789[RFC5789]中被详细描述。这些方法的属性值是一个map，它可以是下列键值对：
 
 |====
-| Name | Description
-| displayName? | An alternate, human-friendly method name in the context of the resource. If the displayName node is not defined for a method, documentation tools SHOULD refer to the resource by its key, which acts as the method name.
-| description? | A longer, human-friendly description of the method in the context of the resource. Its value is a string and MAY be formatted using https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown].
-| (<annotationName>)? | https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#annotations[Annotations] to be applied to this API. An annotation is a map having a key that begins with "(" and ends with ")" where the text enclosed in parentheses is the annotation name, and the value is an instance of that annotation.
-| queryParameters? | Detailed information about any query parameters needed by this method. Mutually exclusive with queryString.
-| headers? | Detailed information about any request headers needed by this method.
-| queryString? | The query string needed by this method. Mutually exclusive with queryParameters.
-| responses? | Information about the expected responses to a request.
-| body? | A request body that the method admits.
-| protocols? | Explicitly specify the protocol(s) used to invoke a method, thereby overriding the protocols set elsewhere, for example in the baseUri or the https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#protocols[root-level protocols] node.
-| is? | A list of the https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-resource-types-and-traits[traits] to apply to this method.
-| securedBy? | The https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-security-schemes[security schemes] that apply to this method.
+| Name | 描述
+| displayName? | 对阅读者友好的别名。若方法未定义此别名，那么默认使用其键值作为方法名的显示。
+| description? | 对阅读者友好的更具体的描述。可以是一个字符串，字符串可以使用  https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#markdown[markdown]格式。
+| (<annotationName>)? | 使用此API的https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#annotations[注解]。注解是一个map，它的键值可以用一对圆括号包围，表示这是一个注解名。注解的值可以是一个注解的实例。
+| queryParameters? | 此方法需要的查询参数的详细信息，与queryString互斥。
+| headers? | 此方法需要的任何请求头的详细信息。
+| queryString? | 此方法需要的查询字符串，与queryParameters互斥。
+| responses? | 请求所需要的响应信息。
+| body? | 方法允许的请求报文体。
+| protocols? | 明确指定用于调用方法的protocols，可以覆盖在其他地方设置的protocols。例如baseUri中或者 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#protocols[顶级protocols]节点。
+| is? | 用于此方法的 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-resource-types-and-traits[特质traits]列表。
+| securedBy? | 用于此方法的https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#applying-security-schemes[安全schemes]。
 |====
 
-=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#headers[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Headers
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#headers[头Headers]
 
 An API's methods can support or require various HTTP headers. The OPTIONAL **headers** node is used to explicitly specify those headers. The value of the headers node is a map, specifically a https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#property-declarations[properties declaration], as is the value of the properties object of a type declaration. Each property in this declaration object is a header **declaration**. Each property name specifies an allowed header name. Each property value specifies the header value type as a type name or an inline type declaration.
 
