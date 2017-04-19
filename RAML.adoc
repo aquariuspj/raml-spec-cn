@@ -1857,9 +1857,9 @@ RESTful API方法对于每个URI资源都是可选的。资源的**get**, **patc
 
 === https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#headers[头Headers]
 
-An API's methods can support or require various HTTP headers. The OPTIONAL **headers** node is used to explicitly specify those headers. The value of the headers node is a map, specifically a https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#property-declarations[properties declaration], as is the value of the properties object of a type declaration. Each property in this declaration object is a header **declaration**. Each property name specifies an allowed header name. Each property value specifies the header value type as a type name or an inline type declaration.
+每个API的方法都可以支持或要求多种HTTP头。**headers**结点是可选的，它能够用于明确指定这些头。头结点的值是一个map，能够指定 https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#property-declarations[属性声明]，它是类型声明的属性对象的值。在此声明对象中的每个属性都是一个头**声明declaration**。每个属性名都指定了一个允许的头名。每个属性的值都指定了头的值类型，它是一个类型名或者一个内联（匿名）类型的声明。
 
-The following simple example shows a post method with a single HTTP header named Zencoder-Api-Key of (implied) string type.
+下列示例展示了一个post方法，它需要一个简单的叫做 Zencoder-Api-Key的字符串类型（隐式）的HTTP头：
 
 [source,java]
 ----
@@ -1875,9 +1875,9 @@ baseUri: https://app.zencoder.com/api/{version}
         description: The API key needed to create a new job
 ----
 
-If a header declaration specifies an array type for the value of the header, processors MUST allow multiple instances of that header in the request or response. In this case, the type of the array elements MUST be applied as the type of the value of header instances.
+如果头声明为头的值指定了一个数组类型，处理器必须允许请求或响应头中包含多个实例。这种情况下，数组元素的类型必须作为头实例的值的类型来使用。
 
-If a header declaration specifies a non-array type for the value of the header, or doesn't specify a type (equivalent to specifying a string type), processors MUST disallow multiple instances of that header in the request or response.
+如果头声明为头的值指定了一个非空数组类型，又或者没有指定类型（等价于指定一个字符串类型），处理器必须禁止请求或响应头中的多个实例。
 
 RAML does not define validation when a header declaration specifies any of the following types for the value of the header: an object type, a union of non-scalar types, or an array type if the underlying type of the array is an object type, array type, or a union of non-scalar types. Processors MAY default to treating the format of the header value as JSON in applying the type to instances of that header, or they MAY allow other treatments based on annotations.
 
