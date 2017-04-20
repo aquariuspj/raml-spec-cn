@@ -1879,11 +1879,11 @@ baseUri: https://app.zencoder.com/api/{version}
 
 如果头声明为头的值指定了一个非空数组类型，又或者没有指定类型（等价于指定一个字符串类型），处理器必须禁止请求或响应头中的多个实例。
 
-RAML does not define validation when a header declaration specifies any of the following types for the value of the header: an object type, a union of non-scalar types, or an array type if the underlying type of the array is an object type, array type, or a union of non-scalar types. Processors MAY default to treating the format of the header value as JSON in applying the type to instances of that header, or they MAY allow other treatments based on annotations.
+当头声明中为头的值指定了以下任意类型时，RAML认为它们无效：对象类型，非scalar类型的联合，或者定义了一个数组类型，该数组的元素是对象类型、数组类型或非scalar类型的联合类型。处理器可以在把类型应用到头的实例时，默认将头值的格式视为JSON，或者允许其他基于注解的处理。
 
-Some headers can also be added by the intermediate client- and server-side systems, such as a browser or a proxy.
+某些头也可以通过中间的客户端或服务端系统来添加，比如浏览器或代理。
 
-The following example illustrates inheriting headers from a trait, allowing multiple instances of a header, specifying examples, and overriding the headers when applied to a method and a resource.
+下列示例展示了从trait继承的头，它允许某个头的多个实例，指定examples，并且在将其应用到一个方法或一个资源上时重写头。
 
 [source,java]
 ----
@@ -1923,19 +1923,19 @@ traits:
         example: gfr456d03ygh38s2
 ----
 
-=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#query-strings-and-query-parameters[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]Query Strings and Query Parameters
+=== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#query-strings-and-query-parameters[查询字符串和查询参数]
 
-An API method can support or require a query string in the URL on which the method is invoked. The query string in a URL is defined in https://www.ietf.org/rfc/rfc3986.txt[RFC3986] as the part of the URL following the question mark separator ("?") and preceding any fragment ("#") separator. The query string can be specified either by the OPTIONAL **queryString** node or by the OPTIONAL **queryParameters** node. The queryString and queryParameters nodes are mutually exclusive: processors MUST NOT allow both to be specified, explicitly or implicitly, on the same method of the same resource.
+API方法可以在方法被调用的URL中支持或指定一个查询字符串。URL中的查询字符串定义在 https://www.ietf.org/rfc/rfc3986.txt[RFC3986]中，并作为URL的一部分使用。查询字符串之前有任意井号("#")分隔符，后续紧跟着问号("?")，它可以通过**queryString**或者**queryParameters**节点指定。queryString和queryParameters节点通常是互斥的：处理器禁止在同一个资源的同一个方法中显示或隐式的同时指定二者。
 
-==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#the-query-string-as-a-whole[<svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg>]The Query String as a Whole
+==== https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/#the-query-string-as-a-whole[查询字符串整体]
 
-The **queryString** node is used to specify the query string as a whole, rather than as name-value pairs. The queryString value is either the name of a data type or an inline data type declaration, including a data type expression. In either case, all base types in type hierarchy of the data type MUST be either a scalar type or the object type, after fully expanding any union type expressions at every level of the type hierarchy.
+**queryString**节点用于指定整个查询字符串，而不是名值对。queryString的值是数据类型的名字或者匿名数据类型声明，也可以是一个数据类型表达式。在任意情况下，在数据类型的类层次中的全部基类都必须是scalar类型或者对象类型，完全扩展后即是在每个类型层次的级别中的任意联合类型表达式。
 
-If the type is derived from a scalar type, the query string as a whole MUST be described by the type.
+如果类型是从scalar类型派生出来的，那么整个查询字符串必须通过类型来描述。
 
-If the type is derived from an object type, processors MUST regard the query string as a URL-encoded serialization of an instance of this object type. The query string must be of the form "parameter1=value1&parameter2=value2&...", where "parameter1", "parameter2", and so on correspond to properties in the object type. Likewise, "value1", "value2", and so on correspond to value specifications in the object type. If a value of a property in the object type is an array type, processors MUST allow multiple instances of that query parameter in the query string. In such a case, the type of the elements of the array MUST be applied as the type of the value of instances of this query parameter.
+如果类型根据对象类型派生出来，处理器必须注意将查询字符串当做这个对象类型的实例的URL编码序列。查询字符串必须是包含表单"parameter1=value1&parameter2=value2..."，其中的"parameter1"，"parameter2"相当于对象类型中的属性。同样的，"value1"，"value2"相当于对象类型中的值。如果对象类型中的属性的值是一个数组类型，处理器必须允许在查询字符串中使用多个查询参数实例。在这种情况下，数组元素的类型必须作为查询参数实例的值的类型来使用。
 
-In the following example, union types and extended multiple types are used to constrain the query parameters to specific alternatives:
+下面的示例中，联合类型和被继承的多个类型都用于将查询参数限制在指定的选项中：
 
 [source,java]
 ----

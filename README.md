@@ -60,10 +60,10 @@ http://live.bilibili.com/3946062
 	* Resource Property[已完成]
 	* Template URIs and URI Parameters[已完成]
 * Methods[正在翻译...]
-	* Headers[正在翻译...]
-	* Query Strings and Query Parameters
-		* The Query String as a Whole
-		* Query Parameters in a Query String
+	* Headers[已完成]
+	* Query Strings and Query Parameters[正在翻译...]
+		* The Query String as a Whole[已完成]
+		* Query Parameters in a Query String[准备开始...]
 	* Bodies
 * Responses
 * Resource Types and Traits
